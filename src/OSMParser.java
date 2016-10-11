@@ -1,15 +1,13 @@
 import java.io.*;
-import java.util.ArrayList;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.XMLReaderFactory;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
@@ -20,11 +18,13 @@ import org.xml.sax.helpers.DefaultHandler;
  * @date September 20, 2009
  */
 class OSMParser {
-	
-    /** OSM file from which the input is being taken. */
+
+    /**
+     * OSM file from which the input is being taken.
+     */
     private File file;
-    
-    private OSMElement currentElement;
+
+    private OSMElement currentPrimaryElement;
 
     /**
      * Initialize an OSMParser that takes data from a specified file.
@@ -40,7 +40,7 @@ class OSMParser {
      * Parse the OSM file underlying this OSMParser.
      */
     public void parse()
-        throws IOException, ParserConfigurationException, SAXException {
+            throws IOException, ParserConfigurationException, SAXException {
         SAXParserFactory spf = SAXParserFactory.newInstance();
         spf.setValidating(false);
         SAXParser saxParser = spf.newSAXParser();
@@ -52,10 +52,10 @@ class OSMParser {
             stream = new FileInputStream(file);
             InputSource source = new InputSource(stream);
             xmlReader.parse(source);
-        } catch(IOException x) {
+        } catch (IOException x) {
             throw x;
         } finally {
-            if(stream != null)
+            if (stream != null)
                 stream.close();
         }
     }
@@ -67,10 +67,14 @@ class OSMParser {
      */
     class OSMHandler extends DefaultHandler {
 
-        /** Current character data. */
+        /**
+         * Current character data.
+         */
         private String cdata;
 
-        /** Attributes of the current element. */
+        /**
+         * Attributes of the current element.
+         */
         private Attributes attributes;
 
         /**
@@ -109,27 +113,27 @@ class OSMParser {
                                  String qName, Attributes atts) {
             attributes = atts;
             System.out.println("startElement: " + namespaceURI + ","
-                               + localName + "," + qName);
- 
+                    + localName + "," + qName);
+
 
             switch (qName) {
-			case "node":
-				currentElement = new Node();
-				break;
-			case "way":
-				// set element to Way;
-				break;
-			case "relation":
-				// set element to Relation;
-				break;	
-			default:
-				break;
-			}
-		
-            if(atts.getLength() > 0)
+                case "node":
+                    currentPrimaryElement = new Node();
+                    break;
+                case "way":
+                    currentPrimaryElement = new Way();
+                    break;
+                case "relation":
+                    currentPrimaryElement = new Relation();
+                    break;
+                default:
+                    break;
+            }
+
+            if (atts.getLength() > 0)
                 showAttrs(atts);
-    
-            
+
+
         }
 
         /**
@@ -139,15 +143,16 @@ class OSMParser {
          */
         public void endElement(String namespaceURI, String localName,
                                String qName) throws SAXParseException {
+
             System.out.println("endElement: " + namespaceURI + ","
-                               + localName + "," + qName);
+                    + localName + "," + qName);
         }
 
         /**
          * Method called by SAX parser when character data is encountered.
          */
         public void characters(char[] ch, int start, int length)
-            throws SAXParseException {
+                throws SAXParseException {
             // OSM files apparently do not have interesting CDATA.
             //System.out.println("cdata(" + length + "): '"
             //                 + new String(ch, start, length) + "'");
@@ -159,45 +164,43 @@ class OSMParser {
          * attributes.
          */
         private void showAttrs(Attributes atts) {
-            for(int i=0; i < atts.getLength(); i++) {
+            for (int i = 0; i < atts.getLength(); i++) {
                 String qName = atts.getQName(i);
                 String type = atts.getType(i);
                 String value = atts.getValue(i);
                 //Takes care of nodes
-                if (currentElement instanceof Node){
+                if (currentPrimaryElement instanceof Node) {
                     // Checks if first time seeing node
-                    if (currentElement.getId() == null){
+                    if (currentPrimaryElement.getId() == null) {
                         // qName is ID
-                        currentElement = new Node(qName);
+                        currentPrimaryElement = new Node(qName);
                     }
                     // Just put attributes in list, with a few exceptions.
                     else {
-                        if (qName.equals("lat")){
-                            ((Node) currentElement).setLat(value);
-                        }
-                        else if (qName.equals("lon")){
-                            ((Node) currentElement).setLon(value);
+                        if (qName.equals("lat")) {
+                            ((Node) currentPrimaryElement).setLat(value);
+                        } else if (qName.equals("lon")) {
+                            ((Node) currentPrimaryElement).setLon(value);
                         }
                         // Put attribute in list
                         else {
-                            currentElement.addAttribute(qName, value);
+                            currentPrimaryElement.addAttribute(qName, value);
                         }
                     }
 
                 }
                 System.out.println("\t" + qName + "=" + value
-                                   + "[" + type + "]");
+                        + "[" + type + "]");
             }
         }
     }
-
 
 
     /**
      * Test driver.  Takes filenames to be parsed as command-line arguments.
      */
     public static void main(String[] args) throws Exception {
-        for(int i = 0; i < args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             OSMParser prsr = new OSMParser(new File(args[i]));
             prsr.parse();
         }
