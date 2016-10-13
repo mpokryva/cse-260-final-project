@@ -1,3 +1,5 @@
+import org.xml.sax.Attributes;
+
 /**
  * Created by mpokr on 10/12/2016.
  */
@@ -6,6 +8,8 @@ public class OSMElementHandler {
     private OSMElement currentPrimaryElement;
     private Tag currentTag;
     private RelationMember currentRelationMember;
+    // Holds ID value of current primary element. Added in case "id" field is not first in the xml file.
+    private String tempPrimaryID:
 
 
     public OSMElementHandler() {
@@ -34,6 +38,34 @@ public class OSMElementHandler {
     }
 
     public void handleNode(String qName, String value) {
+        // Checks if first time seeing node
+        if (currentPrimaryElement.getId() == null) {
+            // value is ID
+            currentPrimaryElement = new Node(value);
+        }
+        // Just put attributes in list, with a few exceptions.
+        else {
+            if (qName.equals("lat")) {
+                ((Node) currentPrimaryElement).setLat(value);
+            } else if (qName.equals("lon")) {
+                ((Node) currentPrimaryElement).setLon(value);
+            }
+            // Put attribute in list
+            else {
+                currentPrimaryElement.addAttribute(qName, value);
+            }
+        }
+    }
+
+    public void handleNode(Attributes atts) {
+        String qName = null;
+        String type = null;
+        String value = null;
+        for (int i = 0; i < atts.getLength(); i++) {
+            qName = atts.getQName(i);
+            type = atts.getType(i);
+            value = atts.getValue(i);
+        }
         // Checks if first time seeing node
         if (currentPrimaryElement.getId() == null) {
             // value is ID
