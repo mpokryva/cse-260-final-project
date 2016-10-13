@@ -36,6 +36,7 @@ class OSMParser {
     public OSMParser(File f) {
         file = f;
         elementHandler = new OSMElementHandler();
+        map = new Map();
     }
 
     /**
@@ -120,7 +121,7 @@ class OSMParser {
 
             // Element is primary (node, way, or relation).
             if (qName.equals("node") || qName.equals("way") || qName.equals("relation")) {
-                map.addElement(elementHandler.getCurrentPrimaryElement());
+               // map.addElement(elementHandler.getCurrentPrimaryElement());
                 elementHandler.choosePrimaryElement(qName);
             }
 
@@ -152,6 +153,10 @@ class OSMParser {
          */
         public void endElement(String namespaceURI, String localName,
                                String qName) throws SAXParseException {
+            // Element is primary (node, way, or relation).
+            if (qName.equals("node") || qName.equals("way") || qName.equals("relation")) {
+                map.addElement(elementHandler.getCurrentPrimaryElement());
+            }
 
             System.out.println("endElement: " + namespaceURI + ","
                     + localName + "," + qName);
@@ -175,11 +180,13 @@ class OSMParser {
         private void showAttrs(Attributes atts) {
             boolean isRelationMemberEmpty = (elementHandler.isRelationMemberNew());
             boolean relationMemberExists = (elementHandler.isRelationMemberNew());
+            boolean isHandled = false;
             for (int i = 0; i < atts.getLength(); i++) {
                 String qName = atts.getQName(i);
                 String type = atts.getType(i);
                 String value = atts.getValue(i);
-                if (elementHandler.getCurrentTag() != null) {
+                // If non-null and incomplete
+                if (!elementHandler.isTagComplete()) {
                     elementHandler.handleTag(qName, value);
                 }
                 // This is a new relation member.

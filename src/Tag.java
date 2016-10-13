@@ -18,7 +18,7 @@ public class Tag {
      * Otherwise, null is returned.
      */
     public String getValue(String key) {
-        if (key.equals(this.key)) {
+        if (key != null && key.equals(this.key)) {
             return value;
         } else {
             return null;

@@ -33,7 +33,7 @@ public class OSMElementHandler {
         }
     }
 
-    public void handleNode(String value, String qName) {
+    public void handleNode(String qName, String value) {
         // Checks if first time seeing node
         if (currentPrimaryElement.getId() == null) {
             // value is ID
@@ -77,14 +77,20 @@ public class OSMElementHandler {
 
 
     public void handleTag(String qName, String value) {
-        if (qName.equals("name")) {
-            currentPrimaryElement.setName(value);
-        } else {
-            currentTag = new Tag(qName, value);
-            currentPrimaryElement.addTag(currentTag);
-        }
-        currentTag = null;
+        // Encountered key.
+        if (qName.equals("k")){
 
+            currentTag = new Tag(value, currentTag.getValue(value));
+        }
+        // Encountered value.
+        else {
+            currentTag = new Tag(currentTag.getKey(), value);
+        }
+        // Tag is complete.
+        if (currentTag.getKey() != null && currentTag.getValue(currentTag.getKey()) != null){
+            currentPrimaryElement.addTag(currentTag);
+            currentTag = null;
+        }
     }
 
 
@@ -124,6 +130,21 @@ public class OSMElementHandler {
 
     public boolean isRelationMemberNew() {
         return (currentRelationMember != null && currentRelationMember.getType() == null);
+    }
+
+    /**
+     * Checks if tag is non null and completely constructed.
+     * @return True if tag is nun OR true if non-null, its key is non-null, and its value is non-null. False otherwise.
+     */
+    public boolean isTagComplete(){
+        if (currentTag != null){
+            return (currentTag.getKey() != null && currentTag.getValue(currentTag.getKey()) != null);
+        }
+        else {
+            return true;
+        }
+
+
     }
 
 
