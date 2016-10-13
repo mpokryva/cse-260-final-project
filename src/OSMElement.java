@@ -6,6 +6,7 @@ public class OSMElement {
 
 	private String name;
 	private String id;
+	// List of attributes such as uis, version, changeset, etc.
 	private HashMap<String, String> attributeList;
 	private List<Tag> tagList;
 	
@@ -24,8 +25,7 @@ public class OSMElement {
 		attributeList.put(key, value);
 	}
 
-	public void addTag(String key, String value) {
-		Tag tagToAdd = new Tag(key, value);
+	public void addTag(Tag tagToAdd) {
 		tagList.add(tagToAdd);
 	}
 

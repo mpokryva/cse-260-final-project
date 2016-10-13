@@ -9,6 +9,8 @@ public class Tag {
 		this.value = value;
 	}
 
+
+
 	/**
 	 * Returns the value of this tag, if the parameter is the same as this tag's key.
 	 * @param key The key supplied by the user.

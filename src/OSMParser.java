@@ -23,8 +23,9 @@ class OSMParser {
      * OSM file from which the input is being taken.
      */
     private File file;
+    private OSMElementHandler elementHandler;
 
-    private OSMElement currentPrimaryElement;
+
 
     /**
      * Initialize an OSMParser that takes data from a specified file.
@@ -34,6 +35,7 @@ class OSMParser {
      */
     public OSMParser(File f) {
         file = f;
+        elementHandler = new OSMElementHandler();
     }
 
     /**
@@ -59,6 +61,12 @@ class OSMParser {
                 stream.close();
         }
     }
+
+
+
+
+
+
 
     /**
      * Handler class used by the SAX XML parser.
@@ -115,20 +123,25 @@ class OSMParser {
             System.out.println("startElement: " + namespaceURI + ","
                     + localName + "," + qName);
 
-
-            switch (qName) {
-                case "node":
-                    currentPrimaryElement = new Node();
-                    break;
-                case "way":
-                    currentPrimaryElement = new Way();
-                    break;
-                case "relation":
-                    currentPrimaryElement = new Relation();
-                    break;
-                default:
-                    break;
+            // Element is primary (node, way, or relation).
+            if (qName.equals("node") || qName.equals("way") || qName.equals("relation")) {
+                elementHandler.choosePrimaryElement(qName);
             }
+
+            // Element is secondary (nd, tag, etc).
+            else {
+                if (qName.equals("tag")) {
+                    elementHandler.createEmptyTag();
+                }
+                if (qName.equals("nd")){
+                    // Adds node reference to current way.
+                    ((Way)elementHandler.getCurrentPrimaryElement()).addNodeRef(atts.getValue(0));
+                }
+                if (qName.equals("member")){
+
+                }
+            }
+
 
             if (atts.getLength() > 0)
                 showAttrs(atts);
@@ -168,27 +181,21 @@ class OSMParser {
                 String qName = atts.getQName(i);
                 String type = atts.getType(i);
                 String value = atts.getValue(i);
-                //Takes care of nodes
-                if (currentPrimaryElement instanceof Node) {
-                    // Checks if first time seeing node
-                    if (currentPrimaryElement.getId() == null) {
-                        // qName is ID
-                        currentPrimaryElement = new Node(qName);
-                    }
-                    // Just put attributes in list, with a few exceptions.
-                    else {
-                        if (qName.equals("lat")) {
-                            ((Node) currentPrimaryElement).setLat(value);
-                        } else if (qName.equals("lon")) {
-                            ((Node) currentPrimaryElement).setLon(value);
-                        }
-                        // Put attribute in list
-                        else {
-                            currentPrimaryElement.addAttribute(qName, value);
-                        }
-                    }
-
+                if (elementHandler.getCurrentTag() != null){
+                    elementHandler.handleTag(qName, value);
                 }
+                //Takes care of nodes
+                if (elementHandler.getCurrentPrimaryElement() instanceof Node) {
+                    elementHandler.handleNode(qName, value);
+                }
+
+                if (elementHandler.getCurrentPrimaryElement() instanceof Way){
+                    elementHandler.handleWay(qName, value);
+                }
+
+
+
+
                 System.out.println("\t" + qName + "=" + value
                         + "[" + type + "]");
             }
@@ -205,6 +212,8 @@ class OSMParser {
             prsr.parse();
         }
     }
+
+
 }
 
 
