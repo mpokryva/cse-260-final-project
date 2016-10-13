@@ -24,6 +24,7 @@ class OSMParser {
      */
     private File file;
     private OSMElementHandler elementHandler;
+    private Map map;
 
 
     /**
@@ -119,6 +120,7 @@ class OSMParser {
 
             // Element is primary (node, way, or relation).
             if (qName.equals("node") || qName.equals("way") || qName.equals("relation")) {
+                map.addElement(elementHandler.getCurrentPrimaryElement());
                 elementHandler.choosePrimaryElement(qName);
             }
 
@@ -171,7 +173,8 @@ class OSMParser {
          * attributes.
          */
         private void showAttrs(Attributes atts) {
-            boolean isRelationMemberEmpty = (elementHandler.getCurrentRelationMember().getType() == null);
+            boolean isRelationMemberEmpty = (elementHandler.isRelationMemberNew());
+            boolean relationMemberExists = (elementHandler.isRelationMemberNew());
             for (int i = 0; i < atts.getLength(); i++) {
                 String qName = atts.getQName(i);
                 String type = atts.getType(i);
@@ -198,8 +201,10 @@ class OSMParser {
                 System.out.println("\t" + qName + "=" + value
                         + "[" + type + "]");
             }
-            // Set relation member back to empty.
-            elementHandler.createEmptyRelationMember();
+            if (relationMemberExists) {
+                elementHandler.createEmptyRelationMember();
+            }
+
         }
     }
 

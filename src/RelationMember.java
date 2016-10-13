@@ -10,7 +10,7 @@ public class RelationMember {
     private String role;
     private List<String> attributes;
 
-    public RelationMember(){
+    public RelationMember() {
 
     }
 
@@ -26,11 +26,11 @@ public class RelationMember {
         this.role = role;
     }
 
-    public void addAttribute(String attribute){
+    public void addAttribute(String attribute) {
         attributes.add(attribute);
     }
 
-    public String getType(){
+    public String getType() {
         return type;
     }
 }

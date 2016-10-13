@@ -10,12 +10,12 @@ public class Relation extends OSMElement {
     private List<RelationMember> memberList;
 
 
-    public Relation(String id){
+    public Relation(String id) {
         super(id);
         memberList = new ArrayList<>();
     }
 
-    public void addMember(RelationMember member){
+    public void addMember(RelationMember member) {
         memberList.add(member);
     }
 }

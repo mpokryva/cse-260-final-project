@@ -4,46 +4,46 @@ import java.util.List;
 
 public class OSMElement {
 
-	private String name;
-	private String id;
-	// List of attributes such as uis, version, changeset, etc.
-	private HashMap<String, String> attributeList;
-	private List<Tag> tagList;
-	
-	public OSMElement(String id){
-		attributeList = new HashMap<>();
-		tagList = new ArrayList<>();
-		this.id = id;
-	}
+    private String name;
+    private String id;
+    // List of attributes such as uis, version, changeset, etc.
+    private HashMap<String, String> attributeList;
+    private List<Tag> tagList;
 
-	public OSMElement (){
+    public OSMElement(String id) {
+        attributeList = new HashMap<>();
+        tagList = new ArrayList<>();
+        this.id = id;
+    }
 
-	}
-	
-	
-	public void addAttribute(String key, String value){
-		attributeList.put(key, value);
-	}
+    public OSMElement() {
 
-	public void addTag(Tag tagToAdd) {
-		tagList.add(tagToAdd);
-	}
+    }
 
-	public String getName() {
-		return name;
-	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void addAttribute(String key, String value) {
+        attributeList.put(key, value);
+    }
 
-	public String getId() {
-		return id;
-	}
+    public void addTag(Tag tagToAdd) {
+        tagList.add(tagToAdd);
+    }
 
-	@Override
-	public int hashCode() {
-		return id.hashCode();
-	}
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 
 }

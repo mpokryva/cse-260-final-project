@@ -30,7 +30,7 @@ public class Node extends OSMElement {
         super(id);
     }
 
-    public Node (){
+    public Node() {
 
     }
 

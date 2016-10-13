@@ -64,8 +64,8 @@ public class OSMElementHandler {
         }
     }
 
-    public void handleRelation(String qName, String value){
-        if (currentPrimaryElement.getId() == null){
+    public void handleRelation(String qName, String value) {
+        if (currentPrimaryElement.getId() == null) {
             // value is ID
             currentPrimaryElement = new Relation(value);
         }
@@ -86,7 +86,6 @@ public class OSMElementHandler {
         currentTag = null;
 
     }
-
 
 
     public void handleRelationMember(String qName, String value) {
@@ -119,8 +118,12 @@ public class OSMElementHandler {
         return currentTag;
     }
 
-    public RelationMember getCurrentRelationMember(){
+    public RelationMember getCurrentRelationMember() {
         return currentRelationMember;
+    }
+
+    public boolean isRelationMemberNew() {
+        return (currentRelationMember != null && currentRelationMember.getType() == null);
     }
 
 
