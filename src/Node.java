@@ -34,6 +34,6 @@ public class Node extends OSMElement {
 
     }
 
-    public void setID
+
 
 }

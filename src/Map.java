@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,6 +8,12 @@ public class Map {
     List<Node> nodes;
     List<Way> ways;
     List<Relation> relations;
+
+    public Map(){
+        nodes = new ArrayList<>();
+        ways = new ArrayList<>();
+        relations = new ArrayList<>();
+    }
 
     public void addNode(Node node) {
         nodes.add(node);

@@ -9,7 +9,7 @@ public class OSMElementHandler {
     private Tag currentTag;
     private RelationMember currentRelationMember;
     // Holds ID value of current primary element. Added in case "id" field is not first in the xml file.
-    private String tempPrimaryID:
+    private String tempPrimaryId;
 
 
     public OSMElementHandler() {
@@ -37,105 +37,127 @@ public class OSMElementHandler {
         }
     }
 
-    public void handleNode(String qName, String value) {
-        // Checks if first time seeing node
-        if (currentPrimaryElement.getId() == null) {
-            // value is ID
-            currentPrimaryElement = new Node(value);
-        }
-        // Just put attributes in list, with a few exceptions.
-        else {
-            if (qName.equals("lat")) {
-                ((Node) currentPrimaryElement).setLat(value);
-            } else if (qName.equals("lon")) {
-                ((Node) currentPrimaryElement).setLon(value);
-            }
-            // Put attribute in list
-            else {
-                currentPrimaryElement.addAttribute(qName, value);
-            }
-        }
-    }
+
 
     public void handleNode(Attributes atts) {
-        String qName = null;
-        String type = null;
-        String value = null;
         for (int i = 0; i < atts.getLength(); i++) {
-            qName = atts.getQName(i);
-            type = atts.getType(i);
-            value = atts.getValue(i);
-        }
-        // Checks if first time seeing node
-        if (currentPrimaryElement.getId() == null) {
-            // value is ID
-            currentPrimaryElement = new Node(value);
-        }
-        // Just put attributes in list, with a few exceptions.
-        else {
-            if (qName.equals("lat")) {
-                ((Node) currentPrimaryElement).setLat(value);
-            } else if (qName.equals("lon")) {
-                ((Node) currentPrimaryElement).setLon(value);
+            String qName = atts.getQName(i);
+            String type = atts.getType(i);
+            String value = atts.getValue(i);
+            // Just put attributes in list, with a few exceptions.
+            switch (qName) {
+                case "lat":
+                    ((Node) currentPrimaryElement).setLat(value);
+                    break;
+                case "lon":
+                    ((Node) currentPrimaryElement).setLon(value);
+                    break;
+                case "id":
+                    // Assumes that ID comes first. Maybe needs revision later on.
+                    currentPrimaryElement = new Node(value);
+                    // Put attribute in list
+                default:
+                    currentPrimaryElement.addAttribute(qName, value);
+                    break;
             }
-            // Put attribute in list
-            else {
-                currentPrimaryElement.addAttribute(qName, value);
+        }
+    }
+
+    public void handleWay(Attributes atts) {
+        for (int i = 0; i < atts.getLength(); i++) {
+            String qName = atts.getQName(i);
+            String type = atts.getType(i);
+            String value = atts.getValue(i);
+            // Just put attributes in list, with a few exceptions.
+            switch (qName) {
+                case "id":
+                    currentPrimaryElement = new Way(value);
+                    // Put attribute in list
+                default:
+                    currentPrimaryElement.addAttribute(qName, value);
+                    break;
             }
         }
     }
 
-    public void handleWay(String qName, String value) {
-        if (currentPrimaryElement.getId() == null) {
-            // value is ID
-            currentPrimaryElement = new Way(value);
+    public void handleRelation(Attributes atts) {
+        for (int i = 0; i < atts.getLength(); i++) {
+            String qName = atts.getQName(i);
+            String type = atts.getType(i);
+            String value = atts.getValue(i);
+            // Just put attributes in list, with a few exceptions.
+            switch (qName) {
+                case "id":
+                    currentPrimaryElement = new Relation(value);
+                    // Put attribute in list
+                default:
+                    currentPrimaryElement.addAttribute(qName, value);
+                    break;
+            }
         }
-        // Just put attributes in list, with a few exceptions.
-        else {
-            currentPrimaryElement.addAttribute(qName, value);
-        }
-    }
 
-    public void handleRelation(String qName, String value) {
-        if (currentPrimaryElement.getId() == null) {
-            // value is ID
-            currentPrimaryElement = new Relation(value);
-        }
-        // Just put attributes in list, with a few exceptions.
-        else {
-            currentPrimaryElement.addAttribute(qName, value);
-        }
     }
 
 
-    public void handleTag(String qName, String value) {
-        // Encountered key.
-        if (qName.equals("k")){
-
-            currentTag = new Tag(value, currentTag.getValue(value));
+    public void handleTag(Attributes atts) {
+        String tempValue = null;
+        boolean isName = false;
+        for (int i = 0; i < atts.getLength(); i++) {
+            String qName = atts.getQName(i);
+            String type = atts.getType(i);
+            String value = atts.getValue(i);
+            // Value of tag. Used to take care of case where "v" precedes "k".
+            switch (qName) {
+                // Encountered key.
+                case "k":
+                    if (value.equals("name")){
+                        isName = true;
+                    }
+                    currentTag = new Tag(value, tempValue);
+                    // Put attribute in list
+                    break;
+                // Encountered value.
+                case "v":
+                    if (isName){
+                        currentPrimaryElement.setName(value);
+                    }
+                    currentTag = new Tag(currentTag.getKey(), value);
+                    tempValue = value;
+                default:
+                    break;
+            }
         }
-        // Encountered value.
-        else {
-            currentTag = new Tag(currentTag.getKey(), value);
-        }
-        // Tag is complete.
-        if (currentTag.getKey() != null && currentTag.getValue(currentTag.getKey()) != null){
+        // Tag is complete. Reset tag.
+        if (!isName) {
             currentPrimaryElement.addTag(currentTag);
-            currentTag = null;
         }
+        currentTag = null;
     }
 
 
-    public void handleRelationMember(String qName, String value) {
-        if (qName.equals("type")) {
-            currentRelationMember.setType(value);
-        } else if (qName.equals("ref")) {
-            currentRelationMember.setRef(value);
-        } else if (qName.equals("role")) {
-            currentRelationMember.setRole(value);
-        } else {
-            currentRelationMember.addAttribute(value);
+    public void handleRelationMember(Attributes atts) {
+        currentRelationMember = new RelationMember();
+        for (int i=0; i < atts.getLength(); i++){
+            String qName = atts.getQName(i);
+            String type = atts.getType(i);
+            String value = atts.getValue(i);
+            switch (qName) {
+                case "type":
+                    currentRelationMember.setType(value);
+                    break;
+                case "ref":
+                    currentRelationMember.setRef(value);
+                    break;
+                case "role":
+                    currentRelationMember.setRole(value);
+                    break;
+                default:
+                    currentRelationMember.addAttribute(value);
+                    break;
+            }
         }
+        ((Relation) currentPrimaryElement).addMember(currentRelationMember);
+        currentRelationMember = null;
     }
 
     public void createEmptyTag() {
@@ -160,19 +182,19 @@ public class OSMElementHandler {
         return currentRelationMember;
     }
 
-    public boolean isRelationMemberNew() {
+    public boolean isRelationMemberComplete() {
         return (currentRelationMember != null && currentRelationMember.getType() == null);
     }
 
     /**
      * Checks if tag is non null and completely constructed.
+     *
      * @return True if tag is nun OR true if non-null, its key is non-null, and its value is non-null. False otherwise.
      */
-    public boolean isTagComplete(){
-        if (currentTag != null){
+    public boolean isTagComplete() {
+        if (currentTag != null) {
             return (currentTag.getKey() != null && currentTag.getValue(currentTag.getKey()) != null);
-        }
-        else {
+        } else {
             return true;
         }
 

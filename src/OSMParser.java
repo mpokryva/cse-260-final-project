@@ -121,27 +121,16 @@ class OSMParser {
 
             // Element is primary (node, way, or relation).
             if (qName.equals("node") || qName.equals("way") || qName.equals("relation")) {
-               // map.addElement(elementHandler.getCurrentPrimaryElement());
+                // map.addElement(elementHandler.getCurrentPrimaryElement());
                 elementHandler.choosePrimaryElement(qName);
             }
 
             // Element is secondary (nd, tag, etc).
-            else {
-                if (qName.equals("tag")) {
-                    elementHandler.createEmptyTag();
-                }
-                if (qName.equals("nd")) {
-                    // Adds node reference to current way.
-                    ((Way) elementHandler.getCurrentPrimaryElement()).addNodeRef(atts.getValue(0));
-                }
-                if (qName.equals("member")) {
-                    elementHandler.createEmptyRelationMember();
-                }
-            }
+
 
 
             if (atts.getLength() > 0)
-                showAttrs(atts);
+                showAttrs(qName, atts);
 
 
         }
@@ -176,41 +165,35 @@ class OSMParser {
         /**
          * Auxiliary method to display the most recently encountered
          * attributes.
+         *
+         * @param qName Type of element (node, way, relation, tag, etc.)
+         * @param atts  Attributes of the element (ID, user ID, etc.)
          */
-        private void showAttrs(Attributes atts) {
-            boolean isRelationMemberEmpty = (elementHandler.isRelationMemberNew());
-            boolean relationMemberExists = (elementHandler.isRelationMemberNew());
-            boolean isHandled = false;
-            for (int i = 0; i < atts.getLength(); i++) {
-                String qName = atts.getQName(i);
-                String type = atts.getType(i);
-                String value = atts.getValue(i);
-                // If non-null and incomplete
-                if (!elementHandler.isTagComplete()) {
-                    elementHandler.handleTag(qName, value);
-                }
-                // This is a new relation member.
-                if (isRelationMemberEmpty) {
-                    elementHandler.handleRelationMember(qName, value);
-                    isRelationMemberEmpty = false;
-                }
-
-                //Takes care of nodes
-                if (elementHandler.getCurrentPrimaryElement() instanceof Node) {
-                    elementHandler.handleNode(qName, value);
-                } else if (elementHandler.getCurrentPrimaryElement() instanceof Way) {
-                    elementHandler.handleWay(qName, value);
-                } else if (elementHandler.getCurrentPrimaryElement() instanceof Relation) {
-                    elementHandler.handleRelation(qName, value);
-                }
-
-
-                System.out.println("\t" + qName + "=" + value
-                        + "[" + type + "]");
+        private void showAttrs(String qName, Attributes atts) {
+            // If non-null and incomplete
+            if (qName.equals("tag")) {
+                elementHandler.handleTag(attributes);
             }
-            if (relationMemberExists) {
-                elementHandler.createEmptyRelationMember();
+            // This is a new relation member.
+            if (qName.equals("member")) {
+                elementHandler.handleRelationMember(attributes);
             }
+            // Assumes that "ref" is the only thing in a "nd" element.
+            if (qName.equals("nd")) {
+                ((Way) elementHandler.getCurrentPrimaryElement()).addNodeRef(atts.getValue(0));
+            }
+            //Takes care of nodes
+            if (elementHandler.getCurrentPrimaryElement() instanceof Node) {
+                elementHandler.handleNode(atts);
+            } else if (elementHandler.getCurrentPrimaryElement() instanceof Way) {
+                elementHandler.handleWay(atts);
+            } else if (elementHandler.getCurrentPrimaryElement() instanceof Relation) {
+                elementHandler.handleRelation(atts);
+            }
+
+
+            //System.out.println("\t" + qName + "=" + value
+              //      + "[" + type + "]");
 
         }
     }
