@@ -26,7 +26,6 @@ class OSMParser {
     private OSMElementHandler elementHandler;
 
 
-
     /**
      * Initialize an OSMParser that takes data from a specified file.
      *
@@ -61,11 +60,6 @@ class OSMParser {
                 stream.close();
         }
     }
-
-
-
-
-
 
 
     /**
@@ -133,12 +127,12 @@ class OSMParser {
                 if (qName.equals("tag")) {
                     elementHandler.createEmptyTag();
                 }
-                if (qName.equals("nd")){
+                if (qName.equals("nd")) {
                     // Adds node reference to current way.
-                    ((Way)elementHandler.getCurrentPrimaryElement()).addNodeRef(atts.getValue(0));
+                    ((Way) elementHandler.getCurrentPrimaryElement()).addNodeRef(atts.getValue(0));
                 }
-                if (qName.equals("member")){
-
+                if (qName.equals("member")) {
+                    elementHandler.createEmptyRelationMember();
                 }
             }
 
@@ -177,28 +171,35 @@ class OSMParser {
          * attributes.
          */
         private void showAttrs(Attributes atts) {
+            boolean isRelationMemberEmpty = (elementHandler.getCurrentRelationMember().getType() == null);
             for (int i = 0; i < atts.getLength(); i++) {
                 String qName = atts.getQName(i);
                 String type = atts.getType(i);
                 String value = atts.getValue(i);
-                if (elementHandler.getCurrentTag() != null){
+                if (elementHandler.getCurrentTag() != null) {
                     elementHandler.handleTag(qName, value);
                 }
+                // This is a new relation member.
+                if (isRelationMemberEmpty) {
+                    elementHandler.handleRelationMember(qName, value);
+                    isRelationMemberEmpty = false;
+                }
+
                 //Takes care of nodes
                 if (elementHandler.getCurrentPrimaryElement() instanceof Node) {
                     elementHandler.handleNode(qName, value);
-                }
-
-                if (elementHandler.getCurrentPrimaryElement() instanceof Way){
+                } else if (elementHandler.getCurrentPrimaryElement() instanceof Way) {
                     elementHandler.handleWay(qName, value);
+                } else if (elementHandler.getCurrentPrimaryElement() instanceof Relation) {
+                    elementHandler.handleRelation(qName, value);
                 }
-
-
 
 
                 System.out.println("\t" + qName + "=" + value
                         + "[" + type + "]");
             }
+            // Set relation member back to empty.
+            elementHandler.createEmptyRelationMember();
         }
     }
 

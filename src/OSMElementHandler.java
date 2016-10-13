@@ -26,7 +26,7 @@ public class OSMElementHandler {
                 currentPrimaryElement = new Way(null);
                 break;
             case "relation":
-                currentPrimaryElement = new Relation();
+                currentPrimaryElement = new Relation(null);
                 break;
             default:
                 break;
@@ -64,6 +64,17 @@ public class OSMElementHandler {
         }
     }
 
+    public void handleRelation(String qName, String value){
+        if (currentPrimaryElement.getId() == null){
+            // value is ID
+            currentPrimaryElement = new Relation(value);
+        }
+        // Just put attributes in list, with a few exceptions.
+        else {
+            currentPrimaryElement.addAttribute(qName, value);
+        }
+    }
+
 
     public void handleTag(String qName, String value) {
         if (qName.equals("name")) {
@@ -75,6 +86,8 @@ public class OSMElementHandler {
         currentTag = null;
 
     }
+
+
 
     public void handleRelationMember(String qName, String value) {
         if (qName.equals("type")) {
@@ -92,6 +105,10 @@ public class OSMElementHandler {
         currentTag = new Tag(null, null);
     }
 
+    public void createEmptyRelationMember() {
+        currentRelationMember = new RelationMember();
+    }
+
 
     public OSMElement getCurrentPrimaryElement() {
         return currentPrimaryElement;
@@ -100,6 +117,10 @@ public class OSMElementHandler {
 
     public Tag getCurrentTag() {
         return currentTag;
+    }
+
+    public RelationMember getCurrentRelationMember(){
+        return currentRelationMember;
     }
 
 

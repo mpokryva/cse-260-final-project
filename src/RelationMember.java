@@ -29,4 +29,8 @@ public class RelationMember {
     public void addAttribute(String attribute){
         attributes.add(attribute);
     }
+
+    public String getType(){
+        return type;
+    }
 }
