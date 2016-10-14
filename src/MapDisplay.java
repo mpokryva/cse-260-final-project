@@ -115,11 +115,11 @@ public class MapDisplay extends JPanel {
             //
             for (Node node : nodesInWay){
                 double lonScaleFactor = (PIXELS_PER_DEGREE)*Math.cos(node.getLat()-NODE_X_OFFSET);
-                double latScaleFactor = (PIXELS_PER_DEGREE)*(1/Math.cos(node.getLat()- NODE_X_OFFSET));
+                double latScaleFactor = (PIXELS_PER_DEGREE);//*(1/Math.cos(node.getLat()- NODE_X_OFFSET));
                 double scaledLat = ((node.getLat() - NODE_X_OFFSET)*latScaleFactor);
                 double scaledLon = ((node.getLon() - NODE_Y_OFFSET)*lonScaleFactor);
                 //g2.draw(new Line2D.Double(scaledLat+300, scaledLon+250,scaledLat+300, scaledLon+250));
-                Ellipse2D.Double point = new Ellipse2D.Double(scaledLon-1500, -1*scaledLat+1300, POINT_RADIUS, POINT_RADIUS);
+                Ellipse2D.Double point = new Ellipse2D.Double(scaledLat+1300, scaledLon-1500, POINT_RADIUS, POINT_RADIUS);
                 g2.fill(point);
             }
         }
