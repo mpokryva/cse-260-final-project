@@ -7,8 +7,13 @@ import java.util.StringJoiner;
  * Created by dpokryvailo on 10/11/2016.
  */
 public class Way extends OSMElement {
+
     private List<String> nodeRefs;
 
+    public Way(String id) {
+        super(id);
+        nodeRefs = new ArrayList<>();
+    }
 
     /**
      * Adds a node reference ID to the node reference list.
@@ -19,8 +24,9 @@ public class Way extends OSMElement {
         nodeRefs.add(nodeRefID);
     }
 
-    public Way(String id) {
-        super(id);
-        nodeRefs = new ArrayList<>();
+    public List<String> getNodeRefList(){
+        return nodeRefs;
     }
+
+
 }

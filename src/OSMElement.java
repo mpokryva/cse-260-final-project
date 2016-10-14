@@ -46,4 +46,19 @@ public class OSMElement {
         return id.hashCode();
     }
 
+    /*
+    Probably NOT correct.
+     */
+    @Override
+    public boolean equals(Object other){
+        if (this == other){
+            return true;
+        }
+        if (!(other instanceof OSMElement)){
+            return false;
+        }
+        OSMElement osmOther = (OSMElement) other;
+        return this.hashCode() == osmOther.hashCode();
+    }
+
 }

@@ -63,6 +63,10 @@ class OSMParser {
         }
     }
 
+    public Map getMap(){
+        return map;
+    }
+
 
     /**
      * Handler class used by the SAX XML parser.
@@ -182,7 +186,7 @@ class OSMParser {
             if (qName.equals("nd")) {
                 ((Way) elementHandler.getCurrentPrimaryElement()).addNodeRef(atts.getValue(0));
             }
-            //Takes care of nodes
+            //Takes care of nodeList
             if (elementHandler.getCurrentPrimaryElement() instanceof Node) {
                 elementHandler.handleNode(atts);
             } else if (elementHandler.getCurrentPrimaryElement() instanceof Way) {
