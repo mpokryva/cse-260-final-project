@@ -9,6 +9,7 @@ public class Map {
     List<Node> nodeList;
     HashMap<String,Node> idToNodeMap;
     HashMap<String,Node> nameToNodeMap;
+    HashMap<String,Way> nameToWayMap;
     List<Way> wayList;
     List<Relation> relationList;
     private double minLat;
@@ -22,6 +23,7 @@ public class Map {
         wayList = new ArrayList<>();
         relationList = new ArrayList<>();
         idToNodeMap = new HashMap<>();
+        nameToWayMap = new HashMap<>();
         minLat = Integer.MAX_VALUE;
         maxLat = Integer.MAX_VALUE;
         minLon = Integer.MAX_VALUE;
@@ -43,7 +45,9 @@ public class Map {
                 minLon = nodeToAdd.getLon();
             }
         } else if (osmElement instanceof Way) {
-            wayList.add((Way) osmElement);
+            Way wayToAdd = (Way) osmElement;
+            wayList.add(wayToAdd);
+            nameToWayMap.put(wayToAdd.getName(), wayToAdd);
         } else {
             relationList.add((Relation)osmElement);
         }
@@ -63,15 +67,29 @@ public class Map {
 
     /**
      * Finds and returns a node according to its name.
-     * @param name The name of the node to look for.
+     * @param nodeName The name of the node to look for.
      * @return Matching node, if exists. Null otherwise.
      */
-    public Node findNodeByName(String name){
-        if (nameToNodeMap.containsKey(name)){
-            return nameToNodeMap.get(name);
+    public Node findNodeByName(String nodeName){
+        if (nameToNodeMap.containsKey(nodeName)){
+            return nameToNodeMap.get(nodeName);
         }
         return null;
     }
+
+    /**
+     * Finds and returns a way according to its name.
+     * @param wayName The name of the way to look for.
+     * @return Matching way, if exists. Null otherwise.
+     */
+    public Way findWayByName(String wayName){
+        if (wayName != null && nameToWayMap.containsKey(wayName)){
+            return nameToWayMap.get(wayName);
+        }
+        return null;
+    }
+
+
 
     /**
      * Finds node objects that a way contains.
@@ -88,6 +106,14 @@ public class Map {
             }
         }
         return nodesInWay;
+    }
+
+    public String[] getWayNames(){
+        String[] wayNames = new String[wayList.size()];
+        for (int i=0; i < wayList.size(); i++){
+            wayNames[i] = wayList.get(i).getName();
+        }
+        return wayNames;
     }
 
     public List<Way> getWayList(){

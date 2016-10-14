@@ -14,6 +14,7 @@ public class OSMElement {
         attributeList = new HashMap<>();
         tagList = new ArrayList<>();
         this.id = id;
+        this.name = "";
     }
 
     public OSMElement() {
