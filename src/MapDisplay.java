@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.io.File;
 import java.util.List;
 
@@ -8,12 +10,16 @@ import java.util.List;
  */
 public class MapDisplay extends JPanel {
     private Map map;
-    private OSMParser parser;
+    private final double NODE_Y_OFFSET;
+    private final double NODE_X_OFFSET;
+    private final double POINT_RADIUS = 2;
+    private static final double PIXELS_PER_DEGREE = 1300;
 
 
     public MapDisplay(Map map){
         this.map = map;
-        parser = new OSMParser(new File("usb.osm"));
+        NODE_X_OFFSET = map.getMinLat();
+        NODE_Y_OFFSET = map.getMinLon();
     }
 
     /**
@@ -33,17 +39,23 @@ public class MapDisplay extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g){
-        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D)g;
+        super.paintComponent(g2);
         List<Way> wayList = map.getWayList();
         for (Way way : wayList){
             List<Node> nodesInWay = map.findNodesInWay(way);
             //
             for (Node node : nodesInWay){
-                int nodeX = (int)node.getLat();
-                int nodeY = (int)node.getLon();
-                g.drawLine(nodeX, nodeY, nodeX, nodeY);
+                double lonScaleFactor = (PIXELS_PER_DEGREE*Math.cos(node.getLat()));
+                double latScaleFactor = (PIXELS_PER_DEGREE*(1/Math.cos(node.getLat())));
+                double scaledLat = ((node.getLat() - NODE_X_OFFSET)*latScaleFactor);
+                double scaledLon = ((node.getLon() - NODE_Y_OFFSET)*lonScaleFactor);
+                //g2.draw(new Line2D.Double(scaledLat+300, scaledLon+250,scaledLat+300, scaledLon+250));
+                Ellipse2D.Double point = new Ellipse2D.Double(scaledLat+300, scaledLon+1000, POINT_RADIUS, POINT_RADIUS);
+                g2.fill(point);
             }
         }
+
     }
 
 
@@ -58,7 +70,8 @@ public class MapDisplay extends JPanel {
         JFrame mainFrame = new JFrame("Map display");
         MapDisplay mapDisplay = new MapDisplay(parser.getMap());
         mainFrame.setContentPane(mapDisplay);
-        mainFrame.pack();
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         mainFrame.setVisible(true);
     }
 }

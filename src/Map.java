@@ -11,15 +11,22 @@ public class Map {
     HashMap<String,Node> nameToNodeMap;
     List<Way> wayList;
     List<Relation> relationList;
+    private double minLat;
+    private double maxLat;
+    private double minLon;
+    private double maxLon;
+
 
     public Map(){
         nodeList = new ArrayList<>();
         wayList = new ArrayList<>();
         relationList = new ArrayList<>();
         idToNodeMap = new HashMap<>();
+        minLat = Integer.MAX_VALUE;
+        maxLat = Integer.MAX_VALUE;
+        minLon = Integer.MAX_VALUE;
+        maxLon = Integer.MAX_VALUE;
     }
-
-
 
 
 
@@ -28,6 +35,13 @@ public class Map {
             Node nodeToAdd = ((Node) osmElement);
             nodeList.add(nodeToAdd);
             idToNodeMap.put(nodeToAdd.getId(), nodeToAdd);
+            //Temporary min lat and lon check. Should be placed elsewhere for more efficiency.
+            if (nodeToAdd.getLat() < minLat){
+                minLat = nodeToAdd.getLat();
+            }
+            if (nodeToAdd.getLon() < minLon){
+                minLon = nodeToAdd.getLon();
+            }
         } else if (osmElement instanceof Way) {
             wayList.add((Way) osmElement);
         } else {
@@ -78,6 +92,38 @@ public class Map {
 
     public List<Way> getWayList(){
         return wayList;
+    }
+
+    public double getMinLat() {
+        return minLat;
+    }
+
+    public void setMinLat(double minLat) {
+        this.minLat = minLat;
+    }
+
+    public double getMaxLat() {
+        return maxLat;
+    }
+
+    public void setMaxLat(double maxLat) {
+        this.maxLat = maxLat;
+    }
+
+    public double getMinLon() {
+        return minLon;
+    }
+
+    public void setMinLon(double minLon) {
+        this.minLon = minLon;
+    }
+
+    public double getMaxLon() {
+        return maxLon;
+    }
+
+    public void setMaxLon(double maxLon) {
+        this.maxLon = maxLon;
     }
 
 
