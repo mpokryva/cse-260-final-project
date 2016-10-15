@@ -7,9 +7,9 @@ import java.util.List;
  */
 public class Map {
     List<Node> nodeList;
-    HashMap<String,Node> idToNodeMap;
-    HashMap<String,Node> nameToNodeMap;
-    HashMap<String,Way> nameToWayMap;
+    HashMap<String, Node> idToNodeMap;
+    HashMap<String, Node> nameToNodeMap;
+    HashMap<String, Way> nameToWayMap;
     List<Way> wayList;
     List<Relation> relationList;
     private double minLat;
@@ -18,7 +18,7 @@ public class Map {
     private double maxLon;
 
 
-    public Map(){
+    public Map() {
         nodeList = new ArrayList<>();
         wayList = new ArrayList<>();
         relationList = new ArrayList<>();
@@ -31,41 +31,43 @@ public class Map {
     }
 
 
-
     public void addElement(OSMElement osmElement) {
         if (osmElement instanceof Node) {
             Node nodeToAdd = ((Node) osmElement);
             nodeList.add(nodeToAdd);
             idToNodeMap.put(nodeToAdd.getId(), nodeToAdd);
             //Temporary min lat and lon check. Should be placed elsewhere for more efficiency.
-            if (nodeToAdd.getLat() < minLat){
-                minLat = nodeToAdd.getLat();
+            double lat = nodeToAdd.getLat();
+            double lon = nodeToAdd.getLon();
+            if (lat < minLat) {
+                minLat = lat;
             }
-            if (nodeToAdd.getLon() < minLon){
-                minLon = nodeToAdd.getLon();
+            if (lon < minLon) {
+                minLon = lon;
             }
-            if (nodeToAdd.getLat() > maxLat){
-                maxLat = nodeToAdd.getLat();
+            if (lat > maxLat) {
+                maxLat = lat;
             }
-            if (nodeToAdd.getLon() > maxLon){
-                maxLon = nodeToAdd.getLon();
+            if (lon > maxLon) {
+                maxLon = lon;
             }
         } else if (osmElement instanceof Way) {
             Way wayToAdd = (Way) osmElement;
             wayList.add(wayToAdd);
             nameToWayMap.put(wayToAdd.getName(), wayToAdd);
         } else {
-            relationList.add((Relation)osmElement);
+            relationList.add((Relation) osmElement);
         }
     }
 
     /**
      * Finds and returns a node according to its ID.
+     *
      * @param id The ID of the node to look for.
      * @return Matching node, if exists. Null otherwise.
      */
-    public Node findNodeById(String id){
-        if (idToNodeMap.containsKey(id)){
+    public Node findNodeById(String id) {
+        if (idToNodeMap.containsKey(id)) {
             return idToNodeMap.get(id);
         }
         return null;
@@ -73,11 +75,12 @@ public class Map {
 
     /**
      * Finds and returns a node according to its name.
+     *
      * @param nodeName The name of the node to look for.
      * @return Matching node, if exists. Null otherwise.
      */
-    public Node findNodeByName(String nodeName){
-        if (nameToNodeMap.containsKey(nodeName)){
+    public Node findNodeByName(String nodeName) {
+        if (nameToNodeMap.containsKey(nodeName)) {
             return nameToNodeMap.get(nodeName);
         }
         return null;
@@ -85,44 +88,45 @@ public class Map {
 
     /**
      * Finds and returns a way according to its name.
+     *
      * @param wayName The name of the way to look for.
      * @return Matching way, if exists. Null otherwise.
      */
-    public Way findWayByName(String wayName){
-        if (wayName != null && nameToWayMap.containsKey(wayName)){
+    public Way findWayByName(String wayName) {
+        if (wayName != null && nameToWayMap.containsKey(wayName)) {
             return nameToWayMap.get(wayName);
         }
         return null;
     }
 
 
-
     /**
      * Finds node objects that a way contains.
+     *
      * @param way The way to find the nodes of.
      * @return A list of nodes objects that the way contains.
      */
-    public List<Node> findNodesInWay(Way way){
+    public List<Node> findNodesInWay(Way way) {
         List<Node> nodesInWay = new ArrayList<>();
-        for (String nodeRef : way.getNodeRefList()){
+        for (String nodeRef : way.getNodeRefList()) {
             Node foundNode = findNodeById(nodeRef);
             // Node exists (node ref is not bogus).
-            if (foundNode != null){
+            if (foundNode != null) {
                 nodesInWay.add(foundNode);
             }
         }
         return nodesInWay;
     }
 
-    public String[] getWayNames(){
+    public String[] getWayNames() {
         String[] wayNames = new String[wayList.size()];
-        for (int i=0; i < wayList.size(); i++){
+        for (int i = 0; i < wayList.size(); i++) {
             wayNames[i] = wayList.get(i).getName();
         }
         return wayNames;
     }
 
-    public List<Way> getWayList(){
+    public List<Way> getWayList() {
         return wayList;
     }
 
