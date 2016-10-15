@@ -25,9 +25,9 @@ public class Map {
         idToNodeMap = new HashMap<>();
         nameToWayMap = new HashMap<>();
         minLat = Integer.MAX_VALUE;
-        maxLat = Integer.MAX_VALUE;
+        maxLat = Integer.MIN_VALUE;
         minLon = Integer.MAX_VALUE;
-        maxLon = Integer.MAX_VALUE;
+        maxLon = Integer.MIN_VALUE;
     }
 
 
@@ -43,6 +43,12 @@ public class Map {
             }
             if (nodeToAdd.getLon() < minLon){
                 minLon = nodeToAdd.getLon();
+            }
+            if (nodeToAdd.getLat() > maxLat){
+                maxLat = nodeToAdd.getLat();
+            }
+            if (nodeToAdd.getLon() > maxLon){
+                maxLon = nodeToAdd.getLon();
             }
         } else if (osmElement instanceof Way) {
             Way wayToAdd = (Way) osmElement;

@@ -16,7 +16,7 @@ public class MapDisplay extends JPanel {
     private final double NODE_Y_OFFSET;
     private final double NODE_X_OFFSET;
     private final double POINT_RADIUS = 2;
-    private static final double PIXELS_PER_DEGREE = 5000;
+    private static final double PIXELS_PER_DEGREE = 7500;
     private JList wayNameList;
     private String selectedWay;
 
@@ -114,12 +114,21 @@ public class MapDisplay extends JPanel {
             List<Node> nodesInWay = map.findNodesInWay(way);
             //
             for (Node node : nodesInWay){
-                double lonScaleFactor = (PIXELS_PER_DEGREE)*Math.cos(node.getLat()-NODE_X_OFFSET);
+                double lonScaleFactor = (PIXELS_PER_DEGREE)*Math.cos(Math.toRadians(node.getLat()));
                 double latScaleFactor = (PIXELS_PER_DEGREE);//*(1/Math.cos(node.getLat()- NODE_X_OFFSET));
-                double scaledLat = ((node.getLat() - NODE_X_OFFSET)*latScaleFactor);
-                double scaledLon = ((node.getLon() - NODE_Y_OFFSET)*lonScaleFactor);
+                double lat = node.getLat();
+                double lon = node.getLon();
+                double centerLat = (map.getMaxLat()-map.getMinLat())/2+map.getMinLat();
+                double centerLon = (map.getMaxLon() - map.getMinLon())/2+map.getMinLon();
+                double scaledLat = (lat-centerLat) * latScaleFactor + (this.getHeight()/2);// (centerLat - pointLat) * zoom + screenHeight/2
+                double scaledLon = (lon-centerLon) * lonScaleFactor + (this.getWidth()/2);
+                //double translationLat = (PIXELS_PER_DEGREE)*40.8 - map.getMinLat();
+               // double translationLon = (PIXELS_PER_DEGREE)*55.3 - map.getMinLon();
+
+                //double translatedLat = scaledLat - translationLat;
+                //double translatedLon = scaledLon + translationLon;
                 //g2.draw(new Line2D.Double(scaledLat+300, scaledLon+250,scaledLat+300, scaledLon+250));
-                Ellipse2D.Double point = new Ellipse2D.Double(scaledLat+1300, scaledLon-1500, POINT_RADIUS, POINT_RADIUS);
+                Ellipse2D.Double point = new Ellipse2D.Double(scaledLon, scaledLat, POINT_RADIUS, POINT_RADIUS);
                 g2.fill(point);
             }
         }
