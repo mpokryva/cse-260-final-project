@@ -126,6 +126,14 @@ public class Map {
         return wayNames;
     }
 
+    public double getCenterLon(){
+        return (getMaxLon() - getMinLon())/2 + getMinLon();
+    }
+
+    public double getCenterLat(){
+        return (getMaxLat() - getMinLat())/2 + getMinLat();
+    }
+
     public List<Way> getWayList() {
         return wayList;
     }

@@ -1,35 +1,36 @@
-import javafx.scene.shape.Polyline;
-
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * Created by mpokr on 10/13/2016.
  */
 public class MapDisplay extends JPanel {
     private Map map;
-    private final double NODE_Y_OFFSET;
-    private final double NODE_X_OFFSET;
-    private final double POINT_RADIUS = 2;
-    private static final double PIXELS_PER_DEGREE = 5000;
+    private double zoom; // Unit is pixels per degree
     private JList wayNameList;
     private String selectedWay;
+    private final double RIGHT_SHIFT = 0.2; // Shift map to left to avoid showing long tail.
+    private double centerLon;
+    private double centerLat;
+
 
 
     public MapDisplay(Map map){
         this.map = map;
-        NODE_X_OFFSET = map.getMinLat();
-        NODE_Y_OFFSET = map.getMinLon();
-        initJList();
+        //initJList();
+        addZoomListener();
+        zoom = 6000;
+        centerLon = map.getCenterLon() + RIGHT_SHIFT;
+        centerLat = map.getCenterLat();
     }
 
     /**
@@ -68,6 +69,44 @@ public class MapDisplay extends JPanel {
         listScroller.setPreferredSize(new Dimension(250, 80));
     }
 
+    private void addZoomListener(){
+        this.addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+
+            }
+        });
+        double[] prevMouseCoords = new double[2];
+        this.addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                double amountRotated = -1*e.getPreciseWheelRotation();
+                double pixelLon = e.getX();
+                double pixelLat = e.getY();
+                if (pixelLon != prevMouseCoords[0] || pixelLat != prevMouseCoords[1]){
+                    double coordLon = convertPixelToLon(pixelLon, pixelLat);
+                    double coordLat = convertPixelToLat(pixelLat);
+                    setCenterCoords(coordLon, coordLat);
+                }
+                double amountToZoom = amountRotated*(zoom/10);
+                zoom += amountToZoom;
+                repaint();
+                prevMouseCoords[0] = pixelLon;
+                prevMouseCoords[1] = pixelLat;
+            }
+        });
+    }
+
+    private void setCenterCoords(double coordLon, double coordLat){
+        centerLon = coordLon;
+        centerLat = coordLat;
+    }
+
 
     @Override
     protected void paintComponent(Graphics g){
@@ -78,29 +117,54 @@ public class MapDisplay extends JPanel {
             List<Node> nodesInWay = map.findNodesInWay(way);
             double[] previousCoords = new double[2];
             for (Node node : nodesInWay){
-                double lonScaleFactor = (PIXELS_PER_DEGREE)*Math.cos(Math.toRadians(node.getLat()));
                 double lat = node.getLat();
                 double lon = node.getLon();
-                double centerLat = (map.getMaxLat()-map.getMinLat())/2 + map.getMinLat();
-                double centerLon = (map.getMaxLon() - map.getMinLon())/2 + map.getMinLon()+.2;
-                double scaledLat = -1*(lat-centerLat) * (PIXELS_PER_DEGREE) + (this.getHeight()/2);// (centerLat - pointLat) * zoom + screenHeight/2
-                double scaledLon = (lon-centerLon) * lonScaleFactor + (this.getWidth()/2);
-                //Ellipse2D.Double point = new Ellipse2D.Double(scaledLon, scaledLat, POINT_RADIUS, POINT_RADIUS);
+                double pixelLat = convertLatToPixels(lat);
+                double pixelLon = convertLonToPixels(lon, lat);
+                //Ellipse2D.Double point = new Ellipse2D.Double(convertedLon, convertedLat, POINT_RADIUS, POINT_RADIUS);
                 //g2.fill(point);
-                Line2D.Double dot = new Line2D.Double(scaledLon,scaledLat,scaledLon,scaledLat);
-                Shape prevLine = new Line2D.Double(previousCoords[0], previousCoords[1], scaledLon, scaledLat);
+                Line2D.Double dot = new Line2D.Double(pixelLon,pixelLat,pixelLon,pixelLat);
+                Shape prevLine = new Line2D.Double(previousCoords[0], previousCoords[1], pixelLon, pixelLat);
                 if (this.getGraphicsConfiguration().getBounds().contains(dot.getX1(), dot.getY1())){
                     if (previousCoords[0] != 0){
                         g2.draw(prevLine);
                     }
                 }
-                previousCoords[0] = scaledLon;
-                previousCoords[1] = scaledLat;
+                previousCoords[0] = pixelLon;
+                previousCoords[1] = pixelLat;
                 g2.draw(dot);
             }
 
 
         }
+    }
+
+    private double convertLatToPixels(double coordLat){
+        double pixelLat = (centerLat-coordLat) * (zoom) + (this.getHeight()/2);
+        return pixelLat;
+    }
+
+    private double convertLonToPixels(double coordLon, double coordLat){
+        double lonScaleFactor = (zoom)*Math.cos(Math.toRadians(coordLat));
+        double pixelLon = (coordLon-centerLon) * lonScaleFactor + (this.getWidth()/2);
+        return pixelLon;
+    }
+
+    private double convertPixelToLat(double pixelLat){
+        double coordLat = pixelLat-(this.getHeight()/2);
+        coordLat = coordLat/zoom;
+        coordLat -= centerLat;
+        coordLat *= -1;
+        return coordLat;
+    }
+
+    private double convertPixelToLon(double pixelLon, double pixelLat){
+        double coordLat = convertPixelToLat(pixelLat);
+        double coordLon = pixelLon - (this.getWidth()/2);
+        coordLon = coordLon/((zoom) * Math.cos(Math.toRadians(coordLat)));
+        coordLon += centerLon;
+        return coordLon;
+
     }
 
 
