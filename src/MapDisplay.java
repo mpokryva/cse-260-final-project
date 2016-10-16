@@ -4,6 +4,7 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.InterruptedIOException;
 import java.util.List;
@@ -15,7 +16,6 @@ public class MapDisplay extends JPanel {
     private Map map;
     private double zoom; // Unit is pixels per degree
     private JList wayNameList;
-    private String selectedWay;
     private final double RIGHT_SHIFT = 0.2; // Shift map to left to avoid showing long tail.
     private double centerLon;
     private double centerLat;
@@ -24,7 +24,6 @@ public class MapDisplay extends JPanel {
 
     public MapDisplay(Map map){
         this.map = map;
-        //initJList();
         addZoomListener();
         addPanListener();
         zoom = 6000;
@@ -32,41 +31,11 @@ public class MapDisplay extends JPanel {
         centerLat = map.getCenterLat();
     }
 
-    /**
-     * Queries the ways of the Map object, and draws roads in the panel.
-     */
-    private void drawRoads(){
-        List<Way> wayList = map.getWayList();
-        for (Way way : wayList){
-            List<Node> nodesInWay = map.findNodesInWay(way);
-            //
-            for (Node node : nodesInWay){
-
-            }
-        }
-    }
-
-    private JList getWayNameJList(){
-        return wayNameList;
-    }
 
 
-    private void addWayListListener(){
-        wayNameList.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                selectedWay = (String)wayNameList.getSelectedValue();
-                repaint();
-            }
-        });
-    }
 
-    private void initJList(){
-        wayNameList = new JList(map.getWayNames());
-        addWayListListener();
-        JScrollPane listScroller = new JScrollPane(wayNameList);
-        listScroller.setPreferredSize(new Dimension(250, 80));
-    }
+
+
 
     private void addPanListener(){
         double[] initCoords = new double[2];
@@ -111,14 +80,6 @@ public class MapDisplay extends JPanel {
                 double coordLat = convertPixelToLat(pixelLat);
                 setCenterCoords(centerLon + (initCoords[0]-coordLon), centerLat + (initCoords[1] - coordLat));
                 repaint();
-                try{
-                    Thread.sleep(10);
-                }
-                catch (InterruptedException exc){
-                    exc.printStackTrace();
-                }
-
-
             }
 
             @Override
@@ -170,8 +131,6 @@ public class MapDisplay extends JPanel {
                 double lon = node.getLon();
                 double pixelLat = convertLatToPixels(lat);
                 double pixelLon = convertLonToPixels(lon, lat);
-                //Ellipse2D.Double point = new Ellipse2D.Double(convertedLon, convertedLat, POINT_RADIUS, POINT_RADIUS);
-                //g2.fill(point);
                 Line2D.Double dot = new Line2D.Double(pixelLon,pixelLat,pixelLon,pixelLat);
                 Shape prevLine = new Line2D.Double(previousCoords[0], previousCoords[1], pixelLon, pixelLat);
                 if (this.getGraphicsConfiguration().getBounds().contains(dot.getX1(), dot.getY1())){
@@ -183,6 +142,10 @@ public class MapDisplay extends JPanel {
                 previousCoords[1] = pixelLat;
                 g2.draw(dot);
             }
+            Rectangle2D.Double center = new Rectangle2D.Double(convertLonToPixels(centerLon, centerLat), convertLatToPixels(centerLat), 5 ,5);
+            g2.setColor(Color.orange);
+            g2.draw(center);
+            g2.setColor(Color.black);
 
 
         }
@@ -230,7 +193,6 @@ public class MapDisplay extends JPanel {
 
         MapDisplay mapDisplay = new MapDisplay(parser.getMap());
         mainFrame.add(mapDisplay);
-        //mainFrame.add(mapDisplay.getWayNameJList(), BorderLayout.WEST);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         mainFrame.setVisible(true);
