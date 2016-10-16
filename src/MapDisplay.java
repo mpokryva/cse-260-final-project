@@ -2,12 +2,10 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import java.awt.event.*;
 import java.awt.geom.Line2D;
 import java.io.File;
+import java.io.InterruptedIOException;
 import java.util.List;
 
 /**
@@ -28,6 +26,7 @@ public class MapDisplay extends JPanel {
         this.map = map;
         //initJList();
         addZoomListener();
+        addPanListener();
         zoom = 6000;
         centerLon = map.getCenterLon() + RIGHT_SHIFT;
         centerLat = map.getCenterLat();
@@ -69,10 +68,56 @@ public class MapDisplay extends JPanel {
         listScroller.setPreferredSize(new Dimension(250, 80));
     }
 
-    private void addZoomListener(){
+    private void addPanListener(){
+        double[] initCoords = new double[2];
+
+        this.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                double pixelLon = e.getX();
+                double pixelLat = e.getY();
+                double coordLon = convertPixelToLon(pixelLon, pixelLat);
+                double coordLat = convertPixelToLat(pixelLat);
+                initCoords[0] = coordLon;
+                initCoords[1] = coordLat;
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
         this.addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
+                double pixelLon = e.getX();
+                double pixelLat = e.getY();
+                double coordLon = convertPixelToLon(pixelLon, pixelLat);
+                double coordLat = convertPixelToLat(pixelLat);
+                setCenterCoords(centerLon + (initCoords[0]-coordLon), centerLat + (initCoords[1] - coordLat));
+                repaint();
+                try{
+                    Thread.sleep(10);
+                }
+                catch (InterruptedException exc){
+                    exc.printStackTrace();
+                }
+
 
             }
 
@@ -81,6 +126,10 @@ public class MapDisplay extends JPanel {
 
             }
         });
+    }
+
+
+    private void addZoomListener() {
         double[] prevMouseCoords = new double[2];
         this.addMouseWheelListener(new MouseWheelListener() {
             @Override
