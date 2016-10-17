@@ -15,7 +15,6 @@ import java.util.List;
 public class MapDisplay extends JPanel {
     private Map map;
     private double zoom; // Unit is pixels per degree
-    private JList wayNameList;
     private final double RIGHT_SHIFT = 0.2; // Shift map to left to avoid showing long tail.
     private double centerLon;
     private double centerLat;
@@ -25,7 +24,8 @@ public class MapDisplay extends JPanel {
         this.map = map;
         addZoomListener();
         addPanListener();
-        zoom = 6000;
+        double defaultZoom = 6000;
+        zoom = defaultZoom;
         centerLon = map.getCenterLon() + RIGHT_SHIFT;
         centerLat = map.getCenterLat();
     }
@@ -90,26 +90,28 @@ public class MapDisplay extends JPanel {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 double amountRotated = -1 * e.getPreciseWheelRotation();
+                double scaleFactor = 10;
+                double zoomScaleFactor = zoom/scaleFactor; //10 chosen randomly.
+                double amountToZoom = amountRotated * zoomScaleFactor;
+                zoom += amountToZoom;
+
                 double pixelLon = e.getX();
                 double pixelLat = e.getY();
                 double mouseCoordLon = convertPixelToLon(pixelLon, pixelLat);
                 double mouseCoordLat = convertPixelToLat(pixelLat);
 
+
+
                 if (mouseCoordLon != prevMouseCoords[0] || mouseCoordLat != prevMouseCoords[1]){
                     if (amountRotated > 0){
-                        setCenterCoords(centerLon + ((mouseCoordLon-centerLon)/10), centerLat + ((mouseCoordLat-centerLat)/10));
+                        setCenterCoords(centerLon + ((mouseCoordLon-centerLon)/scaleFactor), centerLat + ((mouseCoordLat-centerLat)/scaleFactor));
                     }
                     else {
-                        setCenterCoords(centerLon - ((mouseCoordLon-centerLon)/10), centerLat - ((mouseCoordLat-centerLat)/10));
+                        setCenterCoords(centerLon - ((mouseCoordLon-centerLon)/scaleFactor), centerLat - ((mouseCoordLat-centerLat)/scaleFactor));
                     }
                     prevMouseCoords[0] = mouseCoordLon;
                     prevMouseCoords[1] = mouseCoordLat;
                 }
-
-
-                double zoomScaleFactor = zoom/10; //10 chosen randomly.
-                double amountToZoom = amountRotated * zoomScaleFactor;
-                zoom += amountToZoom;
 
                 repaint();
             }
@@ -146,11 +148,6 @@ public class MapDisplay extends JPanel {
                 previousCoords[1] = pixelLat;
                 g2.draw(dot);
             }
-            Rectangle2D.Double center = new Rectangle2D.Double(convertLonToPixels(centerLon, centerLat), convertLatToPixels(centerLat), 5, 5);
-            g2.setColor(Color.orange);
-            g2.draw(center);
-            g2.setColor(Color.black);
-
 
         }
     }
