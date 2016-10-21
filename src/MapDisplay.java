@@ -139,7 +139,7 @@ public class MapDisplay extends JPanel {
                 double pixelLon = convertLonToPixels(lon, lat);
                 Line2D.Double dot = new Line2D.Double(pixelLon, pixelLat, pixelLon, pixelLat);
                 Shape prevLine = new Line2D.Double(previousCoords[0], previousCoords[1], pixelLon, pixelLat);
-                if (this.getGraphicsConfiguration().getBounds().contains(dot.getX1(), dot.getY1())) {
+                if (this.getBounds().contains(dot.getX1(), dot.getY1())) {
                     if (previousCoords[0] != 0) {
                         g2.draw(prevLine);
                     }
