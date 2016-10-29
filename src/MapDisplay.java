@@ -34,7 +34,7 @@ public class MapDisplay extends JPanel {
     private void addPanListener() {
         double[] initCoords = new double[2];
 
-        this.addMouseListener(new MouseListener() {
+        this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
 
@@ -50,22 +50,8 @@ public class MapDisplay extends JPanel {
                 initCoords[1] = coordLat;
             }
 
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
         });
-        this.addMouseMotionListener(new MouseMotionListener() {
+        this.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
                 double pixelLon = e.getX();
@@ -74,11 +60,6 @@ public class MapDisplay extends JPanel {
                 double coordLat = convertPixelToLat(pixelLat);
                 setCenterCoords(centerLon + (initCoords[0] - coordLon), centerLat + (initCoords[1] - coordLat));
                 repaint();
-            }
-
-            @Override
-            public void mouseMoved(MouseEvent e) {
-
             }
         });
     }
