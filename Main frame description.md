@@ -23,7 +23,7 @@
    Placement: Lower-right corner. Below 1).
 
 
-6) Type: Panel
+6) Type: Frame
    Function: Displays the map.
    Placement: Whole screen. Other components are drawn on top of this component.
 
