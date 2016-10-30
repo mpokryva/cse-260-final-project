@@ -1,12 +1,10 @@
+package handin1;
+
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.io.InterruptedIOException;
 import java.util.List;
 
 /**
@@ -58,10 +56,14 @@ public class MapDisplay extends JPanel {
                 double pixelLat = e.getY();
                 double coordLon = convertPixelToLon(pixelLon, pixelLat);
                 double coordLat = convertPixelToLat(pixelLat);
-                setCenterCoords(centerLon + (initCoords[0] - coordLon), centerLat + (initCoords[1] - coordLat));
+                pan((initCoords[0] - coordLon), (initCoords[1] - coordLat));
                 repaint();
             }
         });
+    }
+
+    private void pan(double lonChange, double latChange){
+        setCenterCoords(centerLon + lonChange, centerLat + latChange);
     }
 
 
@@ -80,8 +82,6 @@ public class MapDisplay extends JPanel {
                 double pixelLat = e.getY();
                 double mouseCoordLon = convertPixelToLon(pixelLon, pixelLat);
                 double mouseCoordLat = convertPixelToLat(pixelLat);
-
-
 
                 if (mouseCoordLon != prevMouseCoords[0] || mouseCoordLat != prevMouseCoords[1]){
                     if (amountRotated > 0){
@@ -161,12 +161,20 @@ public class MapDisplay extends JPanel {
 
     }
 
+    public double getZoom(){
+        return zoom;
+    }
+
+    public void setZoom(double newZoom){
+        zoom = newZoom;
+    }
+
 
     public static void main(String[] args) throws Exception {
         OSMParser parser = new OSMParser(new File(args[0]));
         parser.parse();
 
-        JFrame mainFrame = new JFrame("Map display");
+        JFrame mainFrame = new JFrame("handin1.Map display");
         mainFrame.setLayout(new BorderLayout());
 
         MapDisplay mapDisplay = new MapDisplay(parser.getMap());

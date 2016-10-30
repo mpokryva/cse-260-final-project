@@ -1,3 +1,5 @@
+package handin1;
+
 import java.io.ObjectInputStream.GetField;
 
 public class Tag {

@@ -1,7 +1,7 @@
+
+
 **To make reading less tedious, unless specified otherwise, "click" mean left-click.**
 Letters (a, b, c, etc.) are variations on one step/procedure. They are disjoint events.
-
-
 
 
 Use case: Panning

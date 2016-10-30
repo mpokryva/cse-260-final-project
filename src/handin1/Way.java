@@ -1,7 +1,7 @@
+package handin1;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * Created by dpokryvailo on 10/11/2016.

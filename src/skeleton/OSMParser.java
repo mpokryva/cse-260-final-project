@@ -1,14 +1,15 @@
-import java.io.*;
+package skeleton;
+
+import org.xml.sax.*;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Sample parser for reading Open Street Map XML format files.
@@ -23,20 +24,24 @@ class OSMParser {
      * OSM file from which the input is being taken.
      */
     private File file;
+    /**
+     *   Converts parsed XML String to OSMElements
+     */
     private OSMElementHandler elementHandler;
+    /**
+     * Stores the OSMElements
+     */
     private Map map;
 
 
     /**
      * Initialize an OSMParser that takes data from a specified file.
      *
-     * @param s The file to read.
+     * @param f The file to read.
      * @throws IOException
      */
     public OSMParser(File f) {
-        file = f;
-        elementHandler = new OSMElementHandler();
-        map = new Map();
+
     }
 
     /**
@@ -44,28 +49,10 @@ class OSMParser {
      */
     public void parse()
             throws IOException, ParserConfigurationException, SAXException {
-        SAXParserFactory spf = SAXParserFactory.newInstance();
-        spf.setValidating(false);
-        SAXParser saxParser = spf.newSAXParser();
-        XMLReader xmlReader = saxParser.getXMLReader();
-        OSMHandler handler = new OSMHandler();
-        xmlReader.setContentHandler(handler);
-        InputStream stream = null;
-        try {
-            stream = new FileInputStream(file);
-            InputSource source = new InputSource(stream);
-            xmlReader.parse(source);
-        } catch (IOException x) {
-            throw x;
-        } finally {
-            if (stream != null)
-                stream.close();
-        }
+
     }
 
-    public Map getMap(){
-        return map;
-    }
+
 
 
     /**
@@ -143,6 +130,8 @@ class OSMParser {
          * Method called by SAX parser when end tag for XML element is
          * encountered.  This can occur even if there is no explicit end
          * tag present in the document.
+         *
+         * If element is a primary element, it is added to the map.
          */
         public void endElement(String namespaceURI, String localName,
                                String qName) throws SAXParseException {
@@ -167,8 +156,8 @@ class OSMParser {
         }
 
         /**
-         * Auxiliary method to display the most recently encountered
-         * attributes.
+         * Handles the most recently encountered attributes.
+         * Different handling based on the current primary element.
          *
          * @param qName Type of element (node, way, relation, tag, etc.)
          * @param atts  Attributes of the element (ID, user ID, etc.)
@@ -176,42 +165,29 @@ class OSMParser {
         private void showAttrs(String qName, Attributes atts) {
             // If non-null and incomplete
             if (qName.equals("tag")) {
-                elementHandler.handleTag(attributes);
+
             }
             // This is a new relation member.
             if (qName.equals("member")) {
-                elementHandler.handleRelationMember(attributes);
+
             }
             // Assumes that "ref" is the only thing in a "nd" element.
             if (qName.equals("nd")) {
-                ((Way) elementHandler.getCurrentPrimaryElement()).addNodeRef(atts.getValue(0));
+
             }
             //Takes care of nodeList
             if (elementHandler.getCurrentPrimaryElement() instanceof Node) {
-                elementHandler.handleNode(atts);
+
             } else if (elementHandler.getCurrentPrimaryElement() instanceof Way) {
-                elementHandler.handleWay(atts);
+
             } else if (elementHandler.getCurrentPrimaryElement() instanceof Relation) {
-                elementHandler.handleRelation(atts);
+
             }
-
-
-            //System.out.println("\t" + qName + "=" + value
-              //      + "[" + type + "]");
-
         }
     }
 
 
-    /**
-     * Test driver.  Takes filenames to be parsed as command-line arguments.
-     */
-    public static void main(String[] args) throws Exception {
-        for (int i = 0; i < args.length; i++) {
-            OSMParser prsr = new OSMParser(new File(args[i]));
-            prsr.parse();
-        }
-    }
+
 
 
 }
