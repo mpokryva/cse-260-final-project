@@ -101,7 +101,7 @@ public class OSMElementHandler {
 
     public void handleTag(Attributes atts) {
         String tempValue = null;
-        boolean isName = false;
+        boolean hasName = false;
         for (int i = 0; i < atts.getLength(); i++) {
             String qName = atts.getQName(i);
             String type = atts.getType(i);
@@ -111,14 +111,14 @@ public class OSMElementHandler {
                 // Encountered key.
                 case "k":
                     if (value.equals("name")){
-                        isName = true;
+                        hasName = true;
                     }
                     currentTag = new Tag(value, tempValue);
                     // Put attribute in list
                     break;
                 // Encountered value.
                 case "v":
-                    if (isName){
+                    if (hasName){
                         currentPrimaryElement.setName(value);
                     }
                     currentTag = new Tag(currentTag.getKey(), value);
@@ -128,7 +128,7 @@ public class OSMElementHandler {
             }
         }
         // Tag is complete. Reset tag.
-        if (!isName) {
+        if (!hasName) {
             currentPrimaryElement.addTag(currentTag);
         }
         currentTag = null;

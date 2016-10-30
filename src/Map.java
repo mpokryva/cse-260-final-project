@@ -110,7 +110,7 @@ public class Map {
         List<Node> nodesInWay = new ArrayList<>();
         for (String nodeRef : way.getNodeRefList()) {
             Node foundNode = findNodeById(nodeRef);
-            // Node exists (node ref is not bogus).
+            // Checks if node exists (node ref is not bogus).
             if (foundNode != null) {
                 nodesInWay.add(foundNode);
             }
