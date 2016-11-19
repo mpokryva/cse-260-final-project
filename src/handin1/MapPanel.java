@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by mpokr on 10/13/2016.
  */
-public class MapDisplay extends JPanel {
+public class MapPanel extends JPanel {
     private Map map;
     private double zoom; // Unit is pixels per degree
     private final double RIGHT_SHIFT = 0.2; // Shift map to left to avoid showing long tail.
@@ -18,7 +18,7 @@ public class MapDisplay extends JPanel {
     private double centerLat;
 
 
-    public MapDisplay(Map map) {
+    public MapPanel(Map map) {
         this.map = map;
         addZoomListener();
         addPanListener();
@@ -40,23 +40,17 @@ public class MapDisplay extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                double pixelLon = e.getX();
-                double pixelLat = e.getY();
-                double coordLon = convertPixelToLon(pixelLon, pixelLat);
-                double coordLat = convertPixelToLat(pixelLat);
-                initCoords[0] = coordLon;
-                initCoords[1] = coordLat;
+                double[] currentCoords = getMouseLocationAsCoords(e.getX(), e.getY());
+                initCoords[0] = currentCoords[0];
+                initCoords[1] = currentCoords[1];
             }
 
         });
         this.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                double pixelLon = e.getX();
-                double pixelLat = e.getY();
-                double coordLon = convertPixelToLon(pixelLon, pixelLat);
-                double coordLat = convertPixelToLat(pixelLat);
-                pan((initCoords[0] - coordLon), (initCoords[1] - coordLat));
+                double[] currentCoords = getMouseLocationAsCoords(e.getX(), e.getY());
+                pan((initCoords[0] - currentCoords[0]), (initCoords[1] - currentCoords[1]));
                 repaint();
             }
         });
@@ -64,6 +58,16 @@ public class MapDisplay extends JPanel {
 
     private void pan(double lonChange, double latChange){
         setCenterCoords(centerLon + lonChange, centerLat + latChange);
+    }
+
+    private void addLocationSelectionListener(){
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+
+            }
+        });
     }
 
 
@@ -78,20 +82,18 @@ public class MapDisplay extends JPanel {
                 double amountToZoom = amountRotated * zoomScaleFactor;
                 zoom += amountToZoom;
 
-                double pixelLon = e.getX();
-                double pixelLat = e.getY();
-                double mouseCoordLon = convertPixelToLon(pixelLon, pixelLat);
-                double mouseCoordLat = convertPixelToLat(pixelLat);
+                double[] currentCoords = getMouseLocationAsCoords(e.getX(), e.getY());
 
-                if (mouseCoordLon != prevMouseCoords[0] || mouseCoordLat != prevMouseCoords[1]){
+
+                if (currentCoords[0] != prevMouseCoords[0] || currentCoords[1] != prevMouseCoords[1]){
                     if (amountRotated > 0){
-                        setCenterCoords(centerLon + ((mouseCoordLon-centerLon)/scaleFactor), centerLat + ((mouseCoordLat-centerLat)/scaleFactor));
+                        setCenterCoords(centerLon + ((currentCoords[0]-centerLon)/scaleFactor), centerLat + ((currentCoords[1]-centerLat)/scaleFactor));
                     }
                     else {
-                        setCenterCoords(centerLon - ((mouseCoordLon-centerLon)/scaleFactor), centerLat - ((mouseCoordLat-centerLat)/scaleFactor));
+                        setCenterCoords(centerLon - ((currentCoords[0]-centerLon)/scaleFactor), centerLat - ((currentCoords[1]-centerLat)/scaleFactor));
                     }
-                    prevMouseCoords[0] = mouseCoordLon;
-                    prevMouseCoords[1] = mouseCoordLat;
+                    prevMouseCoords[0] = currentCoords[0];
+                    prevMouseCoords[1] = currentCoords[1];
                 }
 
                 repaint();
@@ -131,6 +133,13 @@ public class MapDisplay extends JPanel {
             }
 
         }
+    }
+
+    private double[] getMouseLocationAsCoords(double x, double y){
+        double[] lonLatArray = new double[2];
+        lonLatArray[0] = convertPixelToLon(x, y);
+        lonLatArray[1] = convertPixelToLat(y);
+        return lonLatArray;
     }
 
     private double convertLatToPixels(double coordLat) {
@@ -177,7 +186,7 @@ public class MapDisplay extends JPanel {
         JFrame mainFrame = new JFrame("handin1.Map display");
         mainFrame.setLayout(new BorderLayout());
 
-        MapDisplay mapDisplay = new MapDisplay(parser.getMap());
+        MapPanel mapDisplay = new MapPanel(parser.getMap());
         mainFrame.add(mapDisplay);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
