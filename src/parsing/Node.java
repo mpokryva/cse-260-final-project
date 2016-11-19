@@ -1,4 +1,4 @@
-package handin1;
+package parsing;
 
 public class Node extends OSMElement {
 

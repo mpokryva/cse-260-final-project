@@ -1,4 +1,9 @@
-package handin1;
+package drawing;
+
+import parsing.Map;
+import parsing.Node;
+import parsing.OSMParser;
+import parsing.Way;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,18 +15,18 @@ import java.util.List;
 /**
  * Created by mpokr on 10/13/2016.
  */
-public class MapPanel extends JPanel {
+public class MapPanel extends JPanel implements MapView {
     private Map map;
     private double zoom; // Unit is pixels per degree
     private final double RIGHT_SHIFT = 0.2; // Shift map to left to avoid showing long tail.
     private double centerLon;
     private double centerLat;
 
-
     public MapPanel(Map map) {
         this.map = map;
         addZoomListener();
         addPanListener();
+
         double defaultZoom = 6000;
         zoom = defaultZoom;
         centerLon = map.getCenterLon() + RIGHT_SHIFT;
@@ -65,9 +70,14 @@ public class MapPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-
+                //MapFrame parentFrame = (MapFrame)SwingUtilities.getWindowAncestor(MapPanel.this);
+                MapFrame parent = (MapFrame)MapPanel.this.getParent();
             }
         });
+    }
+
+    public void notificationEvent(){
+
     }
 
 
@@ -179,17 +189,5 @@ public class MapPanel extends JPanel {
     }
 
 
-    public static void main(String[] args) throws Exception {
-        OSMParser parser = new OSMParser(new File(args[0]));
-        parser.parse();
 
-        JFrame mainFrame = new JFrame("handin1.Map display");
-        mainFrame.setLayout(new BorderLayout());
-
-        MapPanel mapDisplay = new MapPanel(parser.getMap());
-        mainFrame.add(mapDisplay);
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        mainFrame.setVisible(true);
-    }
 }

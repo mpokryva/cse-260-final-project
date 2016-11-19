@@ -1,4 +1,4 @@
-package handin1;
+package parsing;
 
 import java.util.List;
 

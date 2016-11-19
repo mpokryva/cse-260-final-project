@@ -1,4 +1,4 @@
-package handin1;
+package parsing;
 
 import java.io.*;
 import javax.xml.parsers.SAXParser;
@@ -13,13 +13,13 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * Sample parser for reading Open Street handin1.Map XML format files.
+ * Sample parser for reading Open Street parsing.Map XML format files.
  * Illustrates the use of SAXParser to parse XML.
  *
  * @author E. Stark
  * @date September 20, 2009
  */
-class OSMParser {
+public class OSMParser {
 
     /**
      * OSM file from which the input is being taken.
@@ -30,7 +30,7 @@ class OSMParser {
 
 
     /**
-     * Initialize an handin1.OSMParser that takes data from a specified file.
+     * Initialize an parsing.OSMParser that takes data from a specified file.
      *
      * @param s The file to read.
      * @throws IOException
@@ -42,7 +42,7 @@ class OSMParser {
     }
 
     /**
-     * Parse the OSM file underlying this handin1.OSMParser.
+     * Parse the OSM file underlying this parsing.OSMParser.
      */
     public void parse()
             throws IOException, ParserConfigurationException, SAXException {

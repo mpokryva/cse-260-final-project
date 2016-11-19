@@ -1,4 +1,4 @@
-package handin1;
+package parsing;
 
 import org.xml.sax.Attributes;
 
@@ -129,7 +129,7 @@ public class OSMElementHandler {
                     break;
             }
         }
-        // handin1.Tag is complete. Reset tag.
+        // parsing.Tag is complete. Reset tag.
         if (!hasName) {
             currentPrimaryElement.addTag(currentTag);
         }
