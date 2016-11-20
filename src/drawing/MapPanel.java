@@ -5,12 +5,14 @@ import parsing.Node;
 import parsing.OSMParser;
 import parsing.Way;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Line2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +26,14 @@ public class MapPanel extends JPanel {
     private final double RIGHT_SHIFT = 0.2; // Shift map to left to avoid showing long tail.
     private double centerLon;
     private double centerLat;
+    private final static BufferedImage STARTING_PIN_ICON = ImageIO.read(new File());
+    private final static BufferedImage ENDING_PIN_ICON = ImageIO.read(new File());
     /**
      * List of selected points (in pixel coordinates)
      */
-    private double[] startingPoint;
-    private double[] endingPoint;
+
+    private Node startingNode;
+    private Node endingNode;
 
     public MapPanel(Map map) {
         this.map = map;
@@ -39,9 +44,6 @@ public class MapPanel extends JPanel {
         centerLon = map.getCenterLon() + RIGHT_SHIFT;
         centerLat = map.getCenterLat();
         addLocationSelectionListener();
-        startingPoint = new double[2];
-        endingPoint = new double[2];
-
     }
 
 
@@ -87,15 +89,12 @@ public class MapPanel extends JPanel {
                     String s = (String) JOptionPane.showInputDialog(MapPanel.this, null,
                             "Location selection", JOptionPane.PLAIN_MESSAGE,
                             null, possibilities, null);
-                    double pixelLon = e.getX();
-                    double pixelLat = e.getY();
+                    double[] currentCoords = getMouseLocationAsCoords(e.getX(), e.getY());
                     if (s.equals(possibilities[0])){
-                        startingPoint[0] = pixelLon;
-                        startingPoint[1] = pixelLat;
+                        startingNode = map.findNearestNode(currentCoords[0], currentCoords[1]);
                     }
                     else if (s.equals(possibilities[1])){
-                        endingPoint[0] = pixelLon;
-                        endingPoint[1] = pixelLat;
+                        endingNode = map.findNearestNode(currentCoords[0], currentCoords[1]);
                     }
                     else {
                         // Activate "Drive there" mode
@@ -168,10 +167,26 @@ public class MapPanel extends JPanel {
                 previousCoords[1] = pixelLat;
                 g2.draw(dot);
             }
-            if (endingPoint.length != 0){
-                Shape dot = new Line2D.Double(endingPoint[0], endingPoint[1], endingPoint[0], endingPoint[1]);
-                g.setColor(Color.RED);
+            if (endingPoint[0] != null){
                 Node nearestNode = map.findNearestNode(endingPoint[0], endingPoint[1]);
+                double lat = nearestNode.getLat();
+                double lon = nearestNode.getLon();
+                double pixelLat = convertLatToPixels(lat);
+                double pixelLon = convertLonToPixels(lon, lat);
+                Line2D.Double dot = new Line2D.Double(pixelLon, pixelLat, pixelLon, pixelLat);
+                g.setColor(Color.RED);
+                g.setColor(Color.BLACK);
+                g2.draw(dot);
+            }
+            if (startingPoint[0] != null){
+                Node nearestNode = map.findNearestNode(startingPoint[0], startingPoint[1]);
+                double lat = nearestNode.getLat();
+                double lon = nearestNode.getLon();
+                double pixelLat = convertLatToPixels(lat);
+                double pixelLon = convertLonToPixels(lon, lat);
+                Line2D.Double dot = new Line2D.Double(pixelLon, pixelLat, pixelLon, pixelLat);
+                g.setColor(Color.GREEN);
+                g.setColor(Color.BLACK);
                 g2.draw(dot);
             }
 
