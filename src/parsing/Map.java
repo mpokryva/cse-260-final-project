@@ -128,6 +128,30 @@ public class Map {
         return wayNames;
     }
 
+    /**
+     * Given a longitude and latitude, returns the nearest node.
+     * @return The nearest node to the given coordinates.
+     * @param coordLon The longitude, in map coordinate units.
+     * @param coordLat The latitude, in map coordinate units.
+     */
+    public Node findNearestNode(double coordLon, double coordLat){
+        double minDistance = Double.MAX_VALUE;
+        Node nearestNode = null;
+        for (Way way : wayList){
+            List<Node> nodesInWay = findNodesInWay(way);
+            for (Node node : nodesInWay){
+                double xDiff = node.getLon() - coordLon;
+                double yDiff = node.getLat() - coordLat;
+                double distance = Math.sqrt((xDiff * xDiff) + (yDiff * yDiff));
+                if (distance < minDistance){
+                    minDistance = distance;
+                    nearestNode = node;
+                }
+            }
+        }
+        return nearestNode;
+    }
+
     public double getCenterLon(){
         return (getMaxLon() - getMinLon())/2 + getMinLon();
     }

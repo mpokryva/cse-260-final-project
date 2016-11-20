@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Line2D;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,6 +24,11 @@ public class MapPanel extends JPanel {
     private final double RIGHT_SHIFT = 0.2; // Shift map to left to avoid showing long tail.
     private double centerLon;
     private double centerLat;
+    /**
+     * List of selected points (in pixel coordinates)
+     */
+    private double[] startingPoint;
+    private double[] endingPoint;
 
     public MapPanel(Map map) {
         this.map = map;
@@ -33,6 +39,9 @@ public class MapPanel extends JPanel {
         centerLon = map.getCenterLon() + RIGHT_SHIFT;
         centerLat = map.getCenterLat();
         addLocationSelectionListener();
+        startingPoint = new double[2];
+        endingPoint = new double[2];
+
     }
 
 
@@ -78,11 +87,26 @@ public class MapPanel extends JPanel {
                     String s = (String) JOptionPane.showInputDialog(MapPanel.this, null,
                             "Location selection", JOptionPane.PLAIN_MESSAGE,
                             null, possibilities, null);
+                    double pixelLon = e.getX();
+                    double pixelLat = e.getY();
+                    if (s.equals(possibilities[0])){
+                        startingPoint[0] = pixelLon;
+                        startingPoint[1] = pixelLat;
+                    }
+                    else if (s.equals(possibilities[1])){
+                        endingPoint[0] = pixelLon;
+                        endingPoint[1] = pixelLat;
+                    }
+                    else {
+                        // Activate "Drive there" mode
+                    }
                 }
             }
 
         });
     }
+
+
 
 
     private void addZoomListener() {
@@ -134,7 +158,7 @@ public class MapPanel extends JPanel {
                 double pixelLat = convertLatToPixels(lat);
                 double pixelLon = convertLonToPixels(lon, lat);
                 Line2D.Double dot = new Line2D.Double(pixelLon, pixelLat, pixelLon, pixelLat);
-                Shape prevLine = new Line2D.Double(previousCoords[0], previousCoords[1], pixelLon, pixelLat);
+                Line2D.Double prevLine = new Line2D.Double(previousCoords[0], previousCoords[1], pixelLon, pixelLat);
                 if (this.getBounds().contains(dot.getX1(), dot.getY1())) {
                     if (previousCoords[0] != 0) {
                         g2.draw(prevLine);
@@ -142,6 +166,12 @@ public class MapPanel extends JPanel {
                 }
                 previousCoords[0] = pixelLon;
                 previousCoords[1] = pixelLat;
+                g2.draw(dot);
+            }
+            if (endingPoint.length != 0){
+                Shape dot = new Line2D.Double(endingPoint[0], endingPoint[1], endingPoint[0], endingPoint[1]);
+                g.setColor(Color.RED);
+                Node nearestNode = map.findNearestNode(endingPoint[0], endingPoint[1]);
                 g2.draw(dot);
             }
 
