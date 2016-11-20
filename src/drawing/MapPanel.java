@@ -6,6 +6,8 @@ import parsing.OSMParser;
 import parsing.Way;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Line2D;
@@ -15,7 +17,7 @@ import java.util.List;
 /**
  * Created by mpokr on 10/13/2016.
  */
-public class MapPanel extends JPanel implements MapView {
+public class MapPanel extends JPanel {
     private Map map;
     private double zoom; // Unit is pixels per degree
     private final double RIGHT_SHIFT = 0.2; // Shift map to left to avoid showing long tail.
@@ -26,11 +28,11 @@ public class MapPanel extends JPanel implements MapView {
         this.map = map;
         addZoomListener();
         addPanListener();
-
         double defaultZoom = 6000;
         zoom = defaultZoom;
         centerLon = map.getCenterLon() + RIGHT_SHIFT;
         centerLat = map.getCenterLat();
+        addLocationSelectionListener();
     }
 
 
@@ -61,23 +63,25 @@ public class MapPanel extends JPanel implements MapView {
         });
     }
 
-    private void pan(double lonChange, double latChange){
+    private void pan(double lonChange, double latChange) {
         setCenterCoords(centerLon + lonChange, centerLat + latChange);
     }
 
-    private void addLocationSelectionListener(){
+    private void addLocationSelectionListener() {
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                //MapFrame parentFrame = (MapFrame)SwingUtilities.getWindowAncestor(MapPanel.this);
-                MapFrame parent = (MapFrame)MapPanel.this.getParent();
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    String[] possibilities = {"Mark as starting location", "Mark as ending location",
+                            "Drive here from current location"};
+                    String s = (String) JOptionPane.showInputDialog(MapPanel.this, null,
+                            "Location selection", JOptionPane.PLAIN_MESSAGE,
+                            null, possibilities, null);
+                }
             }
+
         });
-    }
-
-    public void notificationEvent(){
-
     }
 
 
@@ -88,19 +92,18 @@ public class MapPanel extends JPanel implements MapView {
             public void mouseWheelMoved(MouseWheelEvent e) {
                 double amountRotated = -1 * e.getPreciseWheelRotation();
                 double scaleFactor = 10;
-                double zoomScaleFactor = zoom/scaleFactor; //10 chosen randomly.
+                double zoomScaleFactor = zoom / scaleFactor; //10 chosen randomly.
                 double amountToZoom = amountRotated * zoomScaleFactor;
                 zoom += amountToZoom;
 
                 double[] currentCoords = getMouseLocationAsCoords(e.getX(), e.getY());
 
 
-                if (currentCoords[0] != prevMouseCoords[0] || currentCoords[1] != prevMouseCoords[1]){
-                    if (amountRotated > 0){
-                        setCenterCoords(centerLon + ((currentCoords[0]-centerLon)/scaleFactor), centerLat + ((currentCoords[1]-centerLat)/scaleFactor));
-                    }
-                    else {
-                        setCenterCoords(centerLon - ((currentCoords[0]-centerLon)/scaleFactor), centerLat - ((currentCoords[1]-centerLat)/scaleFactor));
+                if (currentCoords[0] != prevMouseCoords[0] || currentCoords[1] != prevMouseCoords[1]) {
+                    if (amountRotated > 0) {
+                        setCenterCoords(centerLon + ((currentCoords[0] - centerLon) / scaleFactor), centerLat + ((currentCoords[1] - centerLat) / scaleFactor));
+                    } else {
+                        setCenterCoords(centerLon - ((currentCoords[0] - centerLon) / scaleFactor), centerLat - ((currentCoords[1] - centerLat) / scaleFactor));
                     }
                     prevMouseCoords[0] = currentCoords[0];
                     prevMouseCoords[1] = currentCoords[1];
@@ -145,7 +148,7 @@ public class MapPanel extends JPanel implements MapView {
         }
     }
 
-    private double[] getMouseLocationAsCoords(double x, double y){
+    protected double[] getMouseLocationAsCoords(double x, double y) {
         double[] lonLatArray = new double[2];
         lonLatArray[0] = convertPixelToLon(x, y);
         lonLatArray[1] = convertPixelToLat(y);
@@ -180,14 +183,13 @@ public class MapPanel extends JPanel implements MapView {
 
     }
 
-    public double getZoom(){
+    public double getZoom() {
         return zoom;
     }
 
-    public void setZoom(double newZoom){
+    public void setZoom(double newZoom) {
         zoom = newZoom;
     }
-
 
 
 }
