@@ -1,5 +1,6 @@
 package drawing;
 
+import javafx.scene.shape.Circle;
 import parsing.Map;
 import parsing.Node;
 import parsing.OSMParser;
@@ -10,10 +11,14 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.Point;
 import java.awt.event.*;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,8 +31,10 @@ public class MapPanel extends JPanel {
     private final double RIGHT_SHIFT = 0.2; // Shift map to left to avoid showing long tail.
     private double centerLon;
     private double centerLat;
-    private final static BufferedImage STARTING_PIN_ICON = ImageIO.read(new File());
-    private final static BufferedImage ENDING_PIN_ICON = ImageIO.read(new File());
+    private static BufferedImage STARTING_PIN_ICON;
+    private static BufferedImage ENDING_PIN_ICON;
+    private JLabel startingPin;
+    private JLabel endingPin;
     /**
      * List of selected points (in pixel coordinates)
      */
@@ -44,6 +51,17 @@ public class MapPanel extends JPanel {
         centerLon = map.getCenterLon() + RIGHT_SHIFT;
         centerLat = map.getCenterLat();
         addLocationSelectionListener();
+        try {
+            STARTING_PIN_ICON = ImageIO.read(new File("GreenPinIcon.png"));
+            ENDING_PIN_ICON = ImageIO.read(new File("RedPinIcon.png"));
+
+        } catch (IOException e) {
+            System.out.print("No such file exists");
+        }
+    }
+
+    private void setStartingPin(Node node){
+
     }
 
 
@@ -90,13 +108,12 @@ public class MapPanel extends JPanel {
                             "Location selection", JOptionPane.PLAIN_MESSAGE,
                             null, possibilities, null);
                     double[] currentCoords = getMouseLocationAsCoords(e.getX(), e.getY());
-                    if (s.equals(possibilities[0])){
+                    if (s.equals(possibilities[0])) {
                         startingNode = map.findNearestNode(currentCoords[0], currentCoords[1]);
-                    }
-                    else if (s.equals(possibilities[1])){
+                        repaint();
+                    } else if (s.equals(possibilities[1])) {
                         endingNode = map.findNearestNode(currentCoords[0], currentCoords[1]);
-                    }
-                    else {
+                    } else {
                         // Activate "Drive there" mode
                     }
                 }
@@ -104,8 +121,6 @@ public class MapPanel extends JPanel {
 
         });
     }
-
-
 
 
     private void addZoomListener() {
@@ -167,29 +182,48 @@ public class MapPanel extends JPanel {
                 previousCoords[1] = pixelLat;
                 g2.draw(dot);
             }
-            if (endingPoint[0] != null){
-                Node nearestNode = map.findNearestNode(endingPoint[0], endingPoint[1]);
-                double lat = nearestNode.getLat();
-                double lon = nearestNode.getLon();
-                double pixelLat = convertLatToPixels(lat);
-                double pixelLon = convertLonToPixels(lon, lat);
-                Line2D.Double dot = new Line2D.Double(pixelLon, pixelLat, pixelLon, pixelLat);
-                g.setColor(Color.RED);
-                g.setColor(Color.BLACK);
-                g2.draw(dot);
+        }
+        if (startingNode != null) {
+            // User just selected location
+            double lat = startingNode.getLat();
+            double lon = startingNode.getLon();
+            double pixelLat = convertLatToPixels(lat);
+            double pixelLon = convertLonToPixels(lon, lat);
+            setLayout(null);
+            /**
+            JLabel startPin = new JLabel(new ImageIcon(STARTING_PIN_ICON));
+            startPin.setBounds((int)pixelLon, (int)pixelLat, startPin.getPreferredSize().width, startPin.getPreferredSize().height);
+            if (startingPin == null){
+                add(startPin);
+                startingPin = startPin;
+                revalidate();
+                repaint();
             }
-            if (startingPoint[0] != null){
-                Node nearestNode = map.findNearestNode(startingPoint[0], startingPoint[1]);
-                double lat = nearestNode.getLat();
-                double lon = nearestNode.getLon();
-                double pixelLat = convertLatToPixels(lat);
-                double pixelLon = convertLonToPixels(lon, lat);
-                Line2D.Double dot = new Line2D.Double(pixelLon, pixelLat, pixelLon, pixelLat);
-                g.setColor(Color.GREEN);
-                g.setColor(Color.BLACK);
-                g2.draw(dot);
+            // Pin already on the map.
+            else {
+                remove(startingPin);
+                add(startPin);
+                startingPin = startPin;
+                revalidate();
+                repaint();
             }
-
+             **/
+            Ellipse2D.Double marker = new Ellipse2D.Double(pixelLon, pixelLat, 5, 5);
+            g2.setColor(Color.GREEN);
+            g2.fill(marker);
+            g2.draw(marker);
+            g2.setColor(Color.BLACK);
+        }
+        if (endingNode != null) {
+            double lat = endingNode.getLat();
+            double lon = endingNode.getLon();
+            double pixelLat = convertLatToPixels(lat);
+            double pixelLon = convertLonToPixels(lon, lat);
+            Ellipse2D.Double marker = new Ellipse2D.Double(pixelLon, pixelLat, 5, 5);
+            g2.setColor(Color.RED);
+            g2.fill(marker);
+            g2.draw(marker);
+            g2.setColor(Color.BLACK);
         }
     }
 
