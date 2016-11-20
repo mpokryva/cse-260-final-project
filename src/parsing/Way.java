@@ -4,12 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by dpokryvailo on 10/11/2016.
+ * An object of this class represents a way in an OSM file.
  */
 public class Way extends OSMElement {
 
+    /**
+     * A list of this ways's node references.
+     */
     private List<String> nodeRefs;
 
+    /**
+     * Initializes a way with the given ID.
+     *
+     * @param id The ID of this way.
+     */
     public Way(String id) {
         super(id);
         nodeRefs = new ArrayList<>();
@@ -24,7 +32,12 @@ public class Way extends OSMElement {
         nodeRefs.add(nodeRefID);
     }
 
-    public List<String> getNodeRefList(){
+    /**
+     * Returns this way's node references as a list.
+     *
+     * @return A list of this way's node references.
+     */
+    public List<String> getNodeRefList() {
         return nodeRefs;
     }
 

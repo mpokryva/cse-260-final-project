@@ -3,17 +3,27 @@ package parsing;
 import org.xml.sax.Attributes;
 
 /**
- * Created by mpokr on 10/12/2016.
+ * An object of this class is used in conjunction with the OSMParser
+ * to convert elements in an osm file to OSMElement objects.
  */
 public class OSMElementHandler {
 
+    /**
+     * The current OSMElement being handled.
+     */
     private OSMElement currentPrimaryElement;
+    /**
+     * The current Tag being handled.
+     */
     private Tag currentTag;
+    /**
+     * The current RelationMember being handled.
+     */
     private RelationMember currentRelationMember;
-    // Holds ID value of current primary element. Added in case "id" field is not first in the xml file.
-    private String tempPrimaryId;
 
-
+    /**
+     * Default constructor.
+     */
     public OSMElementHandler() {
 
     }
@@ -40,7 +50,11 @@ public class OSMElementHandler {
     }
 
 
-
+    /**
+     * Handles a node element.
+     *
+     * @param atts Attributes of this node.
+     */
     public void handleNode(Attributes atts) {
         for (int i = 0; i < atts.getLength(); i++) {
             String qName = atts.getQName(i);
@@ -65,6 +79,11 @@ public class OSMElementHandler {
         }
     }
 
+    /**
+     * Handles a way element.
+     *
+     * @param atts Attributes of this way.
+     */
     public void handleWay(Attributes atts) {
         for (int i = 0; i < atts.getLength(); i++) {
             String qName = atts.getQName(i);
@@ -82,6 +101,11 @@ public class OSMElementHandler {
         }
     }
 
+    /**
+     * Handles a relation element.
+     *
+     * @param atts Attributes of this relation.
+     */
     public void handleRelation(Attributes atts) {
         for (int i = 0; i < atts.getLength(); i++) {
             String qName = atts.getQName(i);
@@ -101,6 +125,11 @@ public class OSMElementHandler {
     }
 
 
+    /**
+     * Handles a tag element.
+     *
+     * @param atts Attributes of this tag.
+     */
     public void handleTag(Attributes atts) {
         String tempValue = null;
         boolean hasName = false;
@@ -112,7 +141,7 @@ public class OSMElementHandler {
             switch (qName) {
                 // Encountered key.
                 case "k":
-                    if (value.equals("name")){
+                    if (value.equals("name")) {
                         hasName = true;
                     }
                     currentTag = new Tag(value, tempValue);
@@ -120,7 +149,7 @@ public class OSMElementHandler {
                     break;
                 // Encountered value.
                 case "v":
-                    if (hasName){
+                    if (hasName) {
                         currentPrimaryElement.setName(value);
                     }
                     currentTag = new Tag(currentTag.getKey(), value);
@@ -137,9 +166,14 @@ public class OSMElementHandler {
     }
 
 
+    /**
+     * Handles a relation member element.
+     *
+     * @param atts Attributes of this relation member.
+     */
     public void handleRelationMember(Attributes atts) {
         currentRelationMember = new RelationMember();
-        for (int i=0; i < atts.getLength(); i++){
+        for (int i = 0; i < atts.getLength(); i++) {
             String qName = atts.getQName(i);
             String type = atts.getType(i);
             String value = atts.getValue(i);
@@ -162,45 +196,13 @@ public class OSMElementHandler {
         currentRelationMember = null;
     }
 
-    public void createEmptyTag() {
-        currentTag = new Tag(null, null);
-    }
-
-    public void createEmptyRelationMember() {
-        currentRelationMember = new RelationMember();
-    }
-
-
+    /**
+     * Returns the current primary element of this OSMElementHandler.
+     *
+     * @return This handler's current primary element.
+     */
     public OSMElement getCurrentPrimaryElement() {
         return currentPrimaryElement;
-    }
-
-
-    public Tag getCurrentTag() {
-        return currentTag;
-    }
-
-    public RelationMember getCurrentRelationMember() {
-        return currentRelationMember;
-    }
-
-    public boolean isRelationMemberComplete() {
-        return (currentRelationMember != null && currentRelationMember.getType() == null);
-    }
-
-    /**
-     * Checks if tag is non null and completely constructed.
-     *
-     * @return True if tag is nun OR true if non-null, its key is non-null, and its value is non-null. False otherwise.
-     */
-    public boolean isTagComplete() {
-        if (currentTag != null) {
-            return (currentTag.getKey() != null && currentTag.getValue(currentTag.getKey()) != null);
-        } else {
-            return true;
-        }
-
-
     }
 
 

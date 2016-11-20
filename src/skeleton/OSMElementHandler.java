@@ -66,7 +66,7 @@ public class OSMElementHandler {
     }
 
     /**
-     * Handles a wat element.
+     * Handles a way element.
      * @param atts Attributes of this way.
      */
     public void handleWay(Attributes atts) {

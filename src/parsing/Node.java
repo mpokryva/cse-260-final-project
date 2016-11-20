@@ -22,6 +22,13 @@ public class Node extends OSMElement {
     }
 
     /**
+     * Initializes a node based on a given element ID.
+     */
+    public Node(String id){
+        super(id);
+    }
+
+    /**
      * Returns the latitude of this node.
      *
      * @return The latitude of this node.
@@ -56,5 +63,6 @@ public class Node extends OSMElement {
     public void setLon(String lon) {
         this.lon = Double.parseDouble(lon);
     }
+
 
 }

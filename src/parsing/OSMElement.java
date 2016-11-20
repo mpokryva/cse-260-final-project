@@ -52,7 +52,7 @@ public class OSMElement {
      * @param type  The attributes type (uid, changeset, etc.)
      * @param value The value of this attribute.
      */
-    private void addAttribute(String type, String value) {
+    void addAttribute(String type, String value) {
         attributeList.put(type, value);
     }
 
@@ -61,7 +61,7 @@ public class OSMElement {
      *
      * @param tagToAdd The tag to add.
      */
-    private void addTag(Tag tagToAdd) {
+    void addTag(Tag tagToAdd) {
         tagList.add(tagToAdd);
     }
 

@@ -25,14 +25,20 @@ public class OSMParser {
      * OSM file from which the input is being taken.
      */
     private File file;
+    /**
+     *   Converts parsed XML String to OSMElements
+     */
     private OSMElementHandler elementHandler;
+    /**
+     * Map model that stores the OSMElements
+     */
     private Map map;
 
 
     /**
      * Initialize an parsing.OSMParser that takes data from a specified file.
      *
-     * @param s The file to read.
+     * @param f The file to read.
      * @throws IOException
      */
     public OSMParser(File f) {
@@ -65,6 +71,10 @@ public class OSMParser {
         }
     }
 
+    /**
+     * Returns this parser's associated Map object.
+     * @return This parser's associated Map object.
+     */
     public Map getMap(){
         return map;
     }

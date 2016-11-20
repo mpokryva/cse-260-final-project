@@ -1,11 +1,25 @@
 package parsing;
 
-import java.io.ObjectInputStream.GetField;
 
+/**
+ * An object of this class represents a tag in an OSM file.
+ */
 public class Tag {
+    /**
+     * The tag's key.
+     */
     private String key;
+    /**
+     * The tag's value.
+     */
     private String value;
 
+    /**
+     * Initializes a tag with a key and a value.
+     *
+     * @param key   The tag's key.
+     * @param value The tag's value.
+     */
     public Tag(String key, String value) {
         this.key = key;
         this.value = value;
@@ -27,6 +41,11 @@ public class Tag {
         }
     }
 
+    /**
+     * Returns this tag's key
+     *
+     * @return This tag's key.
+     */
     public String getKey() {
         return key;
     }
