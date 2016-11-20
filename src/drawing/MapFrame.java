@@ -18,13 +18,19 @@ public class MapFrame extends JFrame {
      * Contains the actual map
      */
     private MapPanel mapPanel;
+    /**
+     * The map model this MapFrame is based upon.
+     */
     private Map map;
-    private ArrayList<MapView> views;
     /**
      * Displays notifications to user. Hidden until needed.
      */
     private NotificationPanel notificationPanel;
 
+    /**
+     * Initializes this MapFrame based upon the supplied Map object.
+     * @param map The Map to represent this MapFrame.
+     */
     public MapFrame(Map map){
         this.map = map;
         this.setLayout(new BorderLayout());
@@ -38,18 +44,16 @@ public class MapFrame extends JFrame {
         addMapPanelClickListener();
     }
 
-    private void addObserver(MapView view){
-        views.add(view);
-
-
-    }
-
+    /**
+     * Adds a left-click listener to the MapPanel, which sets the text
+     * of the notificationPanel to the location of the click in degrees.
+     */
     private void addMapPanelClickListener(){
         mapPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                double[] currentMouseCoords = mapPanel.getMouseLocationAsCoords(e.getX(), e.getY());
+                double[] currentMouseCoords = mapPanel.getMouseLocationAsCoords(e);
                 currentMouseCoords[0] = Math.round(currentMouseCoords[0]*100.0)/100.0;
                 currentMouseCoords[1] = Math.round(currentMouseCoords[1]*100.0)/100.0;
                 notificationPanel.setText("Coordinates clicked: " + currentMouseCoords[0] + ", " +

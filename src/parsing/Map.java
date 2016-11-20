@@ -8,18 +8,21 @@ import java.util.List;
  * Created by mpokr on 10/13/2016.
  */
 public class Map {
-    List<Node> nodeList;
-    HashMap<String, Node> idToNodeMap;
-    HashMap<String, Node> nameToNodeMap;
-    HashMap<String, Way> nameToWayMap;
-    List<Way> wayList;
-    List<Relation> relationList;
-    private double minLat;
-    private double maxLat;
-    private double minLon;
-    private double maxLon;
+    List<Node> nodeList;     // List of nodes
+    HashMap<String, Node> idToNodeMap;  // Map of id's of Nodes to Nodes.
+    HashMap<String, Node> nameToNodeMap; // Map of names of Nodes to Nodes.
+    HashMap<String, Way> nameToWayMap;  // Map of names of Ways to Ways.
+    List<Way> wayList;  // List of ways.
+    List<Relation> relationList;    // List of relations
+    private double minLat;  // Minimum latitude of this map.
+    private double maxLat;  // Maximum latitude of this map.
+    private double minLon;  // Minimum longitude of this map.
+    private double maxLon;  // Maximum longitude of this map.
 
 
+    /**
+     * Default map constructor. Initializes fields, and not much else.
+     */
     public Map() {
         nodeList = new ArrayList<>();
         wayList = new ArrayList<>();
@@ -33,6 +36,12 @@ public class Map {
     }
 
 
+    /**
+     * Adds an OSMElement to this Map.
+     * Handles different types of OSMElements (Nodes, Ways, Relations).
+     *
+     * @param osmElement Element to add to this map.
+     */
     public void addElement(OSMElement osmElement) {
         if (osmElement instanceof Node) {
             Node nodeToAdd = ((Node) osmElement);
@@ -130,20 +139,21 @@ public class Map {
 
     /**
      * Given a longitude and latitude, returns the nearest node.
-     * @return The nearest node to the given coordinates.
+     *
      * @param coordLon The longitude, in map coordinate units.
      * @param coordLat The latitude, in map coordinate units.
+     * @return The nearest node to the given coordinates.
      */
-    public Node findNearestNode(double coordLon, double coordLat){
+    public Node findNearestNode(double coordLon, double coordLat) {
         double minDistance = Double.MAX_VALUE;
         Node nearestNode = null;
-        for (Way way : wayList){
+        for (Way way : wayList) {
             List<Node> nodesInWay = findNodesInWay(way);
-            for (Node node : nodesInWay){
+            for (Node node : nodesInWay) {
                 double xDiff = node.getLon() - coordLon;
                 double yDiff = node.getLat() - coordLat;
                 double distance = Math.sqrt((xDiff * xDiff) + (yDiff * yDiff));
-                if (distance < minDistance){
+                if (distance < minDistance) {
                     minDistance = distance;
                     nearestNode = node;
                 }
@@ -152,46 +162,90 @@ public class Map {
         return nearestNode;
     }
 
-    public double getCenterLon(){
-        return (getMaxLon() - getMinLon())/2 + getMinLon();
+    /**
+     * Returns the center longitude of this map.
+     * @return This map's center longitude.
+     */
+    public double getCenterLon() {
+        return (getMaxLon() - getMinLon()) / 2 + getMinLon();
     }
 
-    public double getCenterLat(){
-        return (getMaxLat() - getMinLat())/2 + getMinLat();
+    /**
+     * Returns the center latitude of this map.
+     * @return This map's center latitude.
+     */
+    public double getCenterLat() {
+        return (getMaxLat() - getMinLat()) / 2 + getMinLat();
     }
 
+    /**
+     * Returns this map's ways as a list.
+     * @return A list of this map's ways
+     */
     public List<Way> getWayList() {
         return wayList;
     }
 
+    /**
+     * Returns the minimum latitude of this map.
+     * @return This map's minimum latitude.
+     */
     public double getMinLat() {
         return minLat;
     }
 
+    /**
+     * Set the minimum latitude of this map.
+     * @param minLat The new minimum latitude
+     */
     public void setMinLat(double minLat) {
         this.minLat = minLat;
     }
 
+    /**
+     * Set the maximum latitude of this map.
+     * @return maxLat The new maximum latitude
+     */
     public double getMaxLat() {
         return maxLat;
     }
 
+    /**
+     * Set the maximum latitude of this map.
+     * @param maxLat The new maximum latitude
+     */
     public void setMaxLat(double maxLat) {
         this.maxLat = maxLat;
     }
 
+    /**
+     * Returns the minimum longitude of this map.
+     * @return This map's minimum longitude.
+     */
     public double getMinLon() {
         return minLon;
     }
 
+    /**
+     * Set the minimum longitude of this map.
+     * @param minLon The new minimum longitude
+     */
     public void setMinLon(double minLon) {
         this.minLon = minLon;
     }
 
+    /**
+     * Set the maximum longitude of this map.
+     * @return maxLon The new minimum longitude
+     */
     public double getMaxLon() {
         return maxLon;
     }
 
+    /**
+     * Set the maximum longitude of this map.
+     * @param maxLon The new maximum longitude
+     */
     public void setMaxLon(double maxLon) {
         this.maxLon = maxLon;
     }

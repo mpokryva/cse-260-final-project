@@ -24,27 +24,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by mpokr on 10/13/2016.
+ * A JPanel that houses a drawn map, which is based off a supplied Map object.
  */
 public class MapPanel extends JPanel {
+    /**
+     * The map that this MapPanel represents.
+     */
     private Map map;
-    private double zoom; // Unit is pixels per degree
-    private final double RIGHT_SHIFT = 0.2; // Shift map to left to avoid showing long tail.
+    /**
+     * The zoom scale, in pixels per degree of this MapPanel.
+     */
+    private double zoom;
+    /**
+     * A constant that shifts map to left to avoid showing long tail.
+     */
+    private final double RIGHT_SHIFT = 0.2;
+    /**
+     * The center longitude, in map coordinates of this map.
+     */
     private double centerLon;
+    /**
+     * The center latitude, in map coordinates of this map.
+     */
     private double centerLat;
+    /**
+     * Images of pin icons, like in Google Maps. Will implement in the future.
+     */
     private static BufferedImage STARTING_PIN_ICON;
     private static BufferedImage ENDING_PIN_ICON;
     private JLabel startingPin;
     private JLabel endingPin;
-    private static final String STARTING_MARKER_KEY = "STARTING_MARKER";
-    private static final String ENDING_MARKER_KEY = "ENDING_MARKER";
     /**
-     * List of selected points (in pixel coordinates)
+     * The node marked as the starting location.
      */
-
     private Node startingNode;
+    /**
+     * The node marked as the ending location.
+     */
     private Node endingNode;
 
+    /**
+     * Initializes the fields of this MapPanel, and not much else.
+     *
+     * @param map The Map of this MapPanel.
+     */
     public MapPanel(Map map) {
         this.map = map;
         addZoomListener();
@@ -53,7 +76,7 @@ public class MapPanel extends JPanel {
         zoom = defaultZoom;
         centerLon = map.getCenterLon() + RIGHT_SHIFT;
         centerLat = map.getCenterLat();
-        addLocationSelectionListener();
+        addRightMouseClickListener();
         try {
             STARTING_PIN_ICON = ImageIO.read(new File("GreenPinIcon.png"));
             ENDING_PIN_ICON = ImageIO.read(new File("RedPinIcon.png"));
@@ -63,11 +86,10 @@ public class MapPanel extends JPanel {
         }
     }
 
-    private void setStartingPin(Node node){
 
-    }
-
-
+    /**
+     * Adds a listener for user mouse panning.
+     */
     private void addPanListener() {
         double[] initCoords = new double[2];
 
@@ -79,7 +101,7 @@ public class MapPanel extends JPanel {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                double[] currentCoords = getMouseLocationAsCoords(e.getX(), e.getY());
+                double[] currentCoords = getMouseLocationAsCoords(e);
                 initCoords[0] = currentCoords[0];
                 initCoords[1] = currentCoords[1];
             }
@@ -88,18 +110,27 @@ public class MapPanel extends JPanel {
         this.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                double[] currentCoords = getMouseLocationAsCoords(e.getX(), e.getY());
+                double[] currentCoords = getMouseLocationAsCoords(e);
                 pan((initCoords[0] - currentCoords[0]), (initCoords[1] - currentCoords[1]));
                 repaint();
             }
         });
     }
 
+    /**
+     * Increments the center coordinates of the map by the specified amounts
+     *
+     * @param lonChange The amount of longitude to increment by, in degrees.
+     * @param latChange The amount of latitude to increment by, in degrees.
+     */
     private void pan(double lonChange, double latChange) {
         setCenterCoords(centerLon + lonChange, centerLat + latChange);
     }
 
-    private void addLocationSelectionListener() {
+    /**
+     * Adds a listener for the right-mouse clicks.
+     */
+    private void addRightMouseClickListener() {
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -110,7 +141,7 @@ public class MapPanel extends JPanel {
                     String s = (String) JOptionPane.showInputDialog(MapPanel.this, null,
                             "Location selection", JOptionPane.PLAIN_MESSAGE,
                             null, possibilities, null);
-                    double[] currentCoords = getMouseLocationAsCoords(e.getX(), e.getY());
+                    double[] currentCoords = getMouseLocationAsCoords(e);
                     if (s.equals(possibilities[0])) {
                         startingNode = map.findNearestNode(currentCoords[0], currentCoords[1]);
                         repaint();
@@ -126,7 +157,9 @@ public class MapPanel extends JPanel {
 
     }
 
-
+    /**
+     * Adds a listener for user mouse-wheel scrolling.
+     */
     private void addZoomListener() {
         double[] prevMouseCoords = new double[2];
         this.addMouseWheelListener(new MouseWheelListener() {
@@ -138,8 +171,7 @@ public class MapPanel extends JPanel {
                 double amountToZoom = amountRotated * zoomScaleFactor;
                 zoom += amountToZoom;
 
-                double[] currentCoords = getMouseLocationAsCoords(e.getX(), e.getY());
-
+                double[] currentCoords = getMouseLocationAsCoords(e);
 
                 if (currentCoords[0] != prevMouseCoords[0] || currentCoords[1] != prevMouseCoords[1]) {
                     if (amountRotated > 0) {
@@ -156,12 +188,25 @@ public class MapPanel extends JPanel {
         });
     }
 
+    /**
+     * Sets the center coordinates of this map.
+     *
+     * @param coordLon The new center longitude of this map.
+     * @param coordLat The new cetner latitude of this map.
+     */
     private void setCenterCoords(double coordLon, double coordLat) {
         centerLon = coordLon;
         centerLat = coordLat;
     }
 
 
+    /**
+     * Queries the map field for a list of ways, and then draws all the nodes
+     * in the ways as dots, connecting them with lines.
+     * Also draws any markers set by the user.
+     *
+     * @param g The Graphics object the MapPanel uses for drawing.
+     */
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
@@ -197,7 +242,15 @@ public class MapPanel extends JPanel {
         }
     }
 
-    private void drawLocationPin(Graphics2D g2, Node markerLocation, Color color){
+    /**
+     * Draws a location pin (upside-down triangle), who's
+     * tip begins at the specified node.
+     *
+     * @param g2             The Graphics object the MapPanel uses for drawing.
+     * @param markerLocation The Node specifying the pin's location.
+     * @param color          The color of the pin.
+     */
+    private void drawLocationPin(Graphics2D g2, Node markerLocation, Color color) {
         double lat = markerLocation.getLat();
         double lon = markerLocation.getLon();
         double pixelLat = convertLatToPixels(lat);
@@ -223,11 +276,11 @@ public class MapPanel extends JPanel {
          **/
         double triHeight = 20;
         double triWidth = 15;
-        double[] triangleX = new double[]{pixelLon, pixelLon-(triWidth/2), pixelLon+(triWidth/2)};
-        double[] triangleY = new double[]{pixelLat, pixelLat-triHeight, pixelLat-triHeight};
+        double[] triangleX = new double[]{pixelLon, pixelLon - (triWidth / 2), pixelLon + (triWidth / 2)};
+        double[] triangleY = new double[]{pixelLat, pixelLat - triHeight, pixelLat - triHeight};
         Path2D.Double triangle = new Path2D.Double();
         triangle.moveTo(triangleX[0], triangleY[0]);
-        for (int i = 1; i < triangleX.length; i++){
+        for (int i = 1; i < triangleX.length; i++) {
             triangle.lineTo(triangleX[i], triangleY[i]);
         }
         triangle.closePath();
@@ -237,24 +290,51 @@ public class MapPanel extends JPanel {
         g2.setColor(Color.BLACK);
     }
 
-    protected double[] getMouseLocationAsCoords(double x, double y) {
+    /**
+     * A convenience method that given a MouseEvent, returns an array
+     * containing the coordinates of the MouseEvent in degrees.
+     *
+     * @param e The MouseEvent
+     * @return An array of size 2 containing the longitude in the first index, and the
+     * latitude in the second.
+     */
+    protected double[] getMouseLocationAsCoords(MouseEvent e) {
         double[] lonLatArray = new double[2];
-        lonLatArray[0] = convertPixelToLon(x, y);
-        lonLatArray[1] = convertPixelToLat(y);
+        lonLatArray[0] = convertPixelToLon(e.getX(), e.getY());
+        lonLatArray[1] = convertPixelToLat(e.getY());
         return lonLatArray;
     }
 
+    /**
+     * Converts latitude in map coordinates to pixels.
+     *
+     * @param coordLat The latitude (in map coordinates) to convert.
+     * @return Converted latitude (in pixels).
+     */
     private double convertLatToPixels(double coordLat) {
         double pixelLat = (centerLat - coordLat) * (zoom) + (this.getHeight() / 2);
         return pixelLat;
     }
 
+    /**
+     * Converts longitude in map coordinates to pixels.
+     *
+     * @param coordLat The latitude (in map coordinates). Necessary for conversion calculations.
+     * @param coordLon The longitude (in map coordinates) to convert.
+     * @return Converted longitude (in pixels).
+     */
     private double convertLonToPixels(double coordLon, double coordLat) {
         double lonScaleFactor = (zoom) * Math.cos(Math.toRadians(coordLat));
         double pixelLon = (coordLon - centerLon) * lonScaleFactor + (this.getWidth() / 2);
         return pixelLon;
     }
 
+    /**
+     * Converts latitude in pixels to map coordinates.
+     *
+     * @param pixelLat The latitude (in pixels) to convert.
+     * @return Converted latitude (in map coordinates).
+     */
     private double convertPixelToLat(double pixelLat) {
         double coordLat = pixelLat - (this.getHeight() / 2);
         coordLat = coordLat / zoom;
@@ -263,6 +343,13 @@ public class MapPanel extends JPanel {
         return coordLat;
     }
 
+    /**
+     * Converts longitude in pixels to map coordinates.
+     *
+     * @param pixelLat The latitude (in pixels). Necessary for conversion calculations.
+     * @param pixelLon The longitude (in pixels) to convert.
+     * @return Converted longitude (in map coordinates).
+     */
     private double convertPixelToLon(double pixelLon, double pixelLat) {
         double coordLat = convertPixelToLat(pixelLat);
         double coordLon = pixelLon - (this.getWidth() / 2);
@@ -272,10 +359,21 @@ public class MapPanel extends JPanel {
 
     }
 
+    /**
+     * Returns this MapPanel's current zoom scale.
+     *
+     * @return The current zoom scale.
+     */
     public double getZoom() {
         return zoom;
     }
 
+
+    /**
+     * Sets the zoom scale.
+     *
+     * @param newZoom The new zoom.
+     */
     public void setZoom(double newZoom) {
         zoom = newZoom;
     }
