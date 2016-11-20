@@ -15,6 +15,7 @@ import java.awt.Point;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -35,6 +36,8 @@ public class MapPanel extends JPanel {
     private static BufferedImage ENDING_PIN_ICON;
     private JLabel startingPin;
     private JLabel endingPin;
+    private static final String STARTING_MARKER_KEY = "STARTING_MARKER";
+    private static final String ENDING_MARKER_KEY = "ENDING_MARKER";
     /**
      * List of selected points (in pixel coordinates)
      */
@@ -120,6 +123,7 @@ public class MapPanel extends JPanel {
             }
 
         });
+
     }
 
 
@@ -183,48 +187,54 @@ public class MapPanel extends JPanel {
                 g2.draw(dot);
             }
         }
+
         if (startingNode != null) {
             // User just selected location
-            double lat = startingNode.getLat();
-            double lon = startingNode.getLon();
-            double pixelLat = convertLatToPixels(lat);
-            double pixelLon = convertLonToPixels(lon, lat);
-            setLayout(null);
-            /**
-            JLabel startPin = new JLabel(new ImageIcon(STARTING_PIN_ICON));
-            startPin.setBounds((int)pixelLon, (int)pixelLat, startPin.getPreferredSize().width, startPin.getPreferredSize().height);
-            if (startingPin == null){
-                add(startPin);
-                startingPin = startPin;
-                revalidate();
-                repaint();
-            }
-            // Pin already on the map.
-            else {
-                remove(startingPin);
-                add(startPin);
-                startingPin = startPin;
-                revalidate();
-                repaint();
-            }
-             **/
-            Ellipse2D.Double marker = new Ellipse2D.Double(pixelLon, pixelLat, 5, 5);
-            g2.setColor(Color.GREEN);
-            g2.fill(marker);
-            g2.draw(marker);
-            g2.setColor(Color.BLACK);
+            drawLocationPin(g2, startingNode, Color.GREEN);
         }
         if (endingNode != null) {
-            double lat = endingNode.getLat();
-            double lon = endingNode.getLon();
-            double pixelLat = convertLatToPixels(lat);
-            double pixelLon = convertLonToPixels(lon, lat);
-            Ellipse2D.Double marker = new Ellipse2D.Double(pixelLon, pixelLat, 5, 5);
-            g2.setColor(Color.RED);
-            g2.fill(marker);
-            g2.draw(marker);
-            g2.setColor(Color.BLACK);
+            drawLocationPin(g2, endingNode, Color.RED);
         }
+    }
+
+    private void drawLocationPin(Graphics2D g2, Node markerLocation, Color color){
+        double lat = markerLocation.getLat();
+        double lon = markerLocation.getLon();
+        double pixelLat = convertLatToPixels(lat);
+        double pixelLon = convertLonToPixels(lon, lat);
+        setLayout(null);
+        /**
+         JLabel startPin = new JLabel(new ImageIcon(STARTING_PIN_ICON));
+         startPin.setBounds((int)pixelLon, (int)pixelLat, startPin.getPreferredSize().width, startPin.getPreferredSize().height);
+         if (startingPin == null){
+         add(startPin);
+         startingPin = startPin;
+         revalidate();
+         repaint();
+         }
+         // Pin already on the map.
+         else {
+         remove(startingPin);
+         add(startPin);
+         startingPin = startPin;
+         revalidate();
+         repaint();
+         }
+         **/
+        double triHeight = 20;
+        double triWidth = 15;
+        double[] triangleX = new double[]{pixelLon, pixelLon-(triWidth/2), pixelLon+(triWidth/2)};
+        double[] triangleY = new double[]{pixelLat, pixelLat-triHeight, pixelLat-triHeight};
+        Path2D.Double triangle = new Path2D.Double();
+        triangle.moveTo(triangleX[0], triangleY[0]);
+        for (int i = 1; i < triangleX.length; i++){
+            triangle.lineTo(triangleX[i], triangleY[i]);
+        }
+        triangle.closePath();
+        g2.setColor(color);
+        g2.fill(triangle);
+        g2.draw(triangle);
+        g2.setColor(Color.BLACK);
     }
 
     protected double[] getMouseLocationAsCoords(double x, double y) {

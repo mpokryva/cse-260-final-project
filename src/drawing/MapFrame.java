@@ -35,7 +35,7 @@ public class MapFrame extends JFrame {
         this.add(mapPanel, BorderLayout.CENTER);
         this.add(notificationPanel, BorderLayout.SOUTH);
         this.setVisible(true);
-        //addMapPanelClickListener();
+        addMapPanelClickListener();
     }
 
     private void addObserver(MapView view){
@@ -52,7 +52,7 @@ public class MapFrame extends JFrame {
                 double[] currentMouseCoords = mapPanel.getMouseLocationAsCoords(e.getX(), e.getY());
                 currentMouseCoords[0] = Math.round(currentMouseCoords[0]*100.0)/100.0;
                 currentMouseCoords[1] = Math.round(currentMouseCoords[1]*100.0)/100.0;
-                notificationPanel.setText("Current coordinates: " + currentMouseCoords[0] + ", " +
+                notificationPanel.setText("Coordinates clicked: " + currentMouseCoords[0] + ", " +
                                                 currentMouseCoords[1]);
                 System.out.println("Map clicked");
                 repaint();
