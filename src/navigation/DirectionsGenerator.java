@@ -25,7 +25,6 @@ public class DirectionsGenerator {
      * The current (latest & relevant) path this generator has generated.
      */
     private List<Way> currentPath;
-
     /**
      * Initializes a DirectionsGenerator based on the specified Map.
      */
@@ -58,6 +57,22 @@ public class DirectionsGenerator {
      */
     public boolean isWayInCurrentPath(Way way){
         return true; //FOR NOW.
+    }
+
+    /**
+     * Returns the starting point of this generator's current path.
+     * @return The starting point of this generator's current path.
+     */
+    private Node getCurrentStartingPoint(){
+        return new Node(); // FOR NOW
+    }
+
+    /**
+     * Returns the ending point of this generator's current path.
+     * @return The ending point of this generator's current path.
+     */
+    private Node getCurrentEndingPoint(){
+        return new Node(); // FOR NOW
     }
 
 

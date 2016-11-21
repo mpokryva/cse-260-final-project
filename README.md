@@ -1,9 +1,19 @@
-All UML related stuff is in "UML Diagrams" directory.
 
-The skeleton implementation of parsing and drawing is in /src/skeleton.
 
-I still kept the implemented classes from the first hand-in, in /src/hadin1, for convenience.
+The location selection is fully functional (I hope), although it is not completely
+polished yet. I will make it look better over the next week. Same goes for the map itsel.
 
-If there are any parts in the UML diagrams that have "drawing." before a class/interface/method name,
-this is because they were automatically changed by the IDE.
-I tried to change them back, but it is possible I missed one by accident.
+Some methods of working classes (those in packages "parsing" and "drawing" are not implemented
+yet. Because I work better when I actually start to implement things, rather than plan them
+out in diagrams, the result is redundant, and sometimes lacking methods.
+
+I have left the main frame description and use cases from handin 2 for your convenience.
+
+The MapFrame class, which is the top level class, does not have some UI components fully
+implemented yet. This is because they were not required to do the things specified in this
+handin. I am planning to implement and polish them up over the upcoming break and periodically
+push them to my Git server.
+
+Some details (minor in my opinion) were left out of the sequence diagrams. I did this to prevent from making
+them ridiculously long. As you will find out, the "Driving There" sequence diagram is already long as it is.
+Hopefully it will take you less time to read it than it took me to make it. I apologize about that in advance.

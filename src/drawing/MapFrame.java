@@ -39,9 +39,15 @@ public class MapFrame extends JFrame // implements GPSListener
      */
     private Person person;
     /**
+     * This MapFrame's mode. Can be DRIVE_THERE, or SELECTING_LOCATION, for ex.
+     * Not yet implemented.
+     */
+    private String mode;
+    /**
      * Initializes this MapFrame based upon the supplied Map object.
      * @param map The Map to represent this MapFrame.
      */
+
     public MapFrame(Map map){
         this.map = map;
         directionsGenerator = new DirectionsGenerator(map);
@@ -113,6 +119,10 @@ public class MapFrame extends JFrame // implements GPSListener
      */
     public void getGPSDevice(){
         // Not really void. Does not return GPSDevice for compilation purposes.
+    }
+
+    public void setMode(String newMode){
+        this.mode = newMode;
     }
 
 
