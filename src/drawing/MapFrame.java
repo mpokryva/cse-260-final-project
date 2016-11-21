@@ -1,6 +1,9 @@
 package drawing;
 
+import navigation.DirectionsGenerator;
+import navigation.Person;
 import parsing.Map;
+import parsing.Node;
 import parsing.OSMParser;
 
 import javax.swing.*;
@@ -8,7 +11,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.ArrayList;
 
 /**
  * Top-level frame holding the map, the notification area, etc.
@@ -23,16 +25,25 @@ public class MapFrame extends JFrame {
      */
     private Map map;
     /**
-     * Displays notifications to user. Hidden until needed.
+     * Panel that displays notifications to user. Hidden until needed.
      */
     private NotificationPanel notificationPanel;
 
+    /**
+     * Calculates directions from one point to another.
+     */
+    private DirectionsGenerator directionsGenerator;
+    /**
+     * A person located somewhere on this map, whose location changes.
+     */
+    private Person person;
     /**
      * Initializes this MapFrame based upon the supplied Map object.
      * @param map The Map to represent this MapFrame.
      */
     public MapFrame(Map map){
         this.map = map;
+        directionsGenerator = new DirectionsGenerator(map);
         this.setLayout(new BorderLayout());
         this.mapPanel = new MapPanel(map);
         this.notificationPanel = new NotificationPanel(500, 300);
@@ -69,6 +80,38 @@ public class MapFrame extends JFrame {
         parser.parse();
         MapFrame mapFrame = new MapFrame(parser.getMap());
         System.out.println("Hello");
+    }
+
+    /**
+     * Returns the user-selected starting node.
+     * @return The user-selected starting node.
+     */
+    public Node getStartingNode(){
+        return mapPanel.getStartingNode();
+    }
+
+    /**
+     * Returns the user selected ending node.
+     * @return The user-selected ending node.
+     */
+    public Node getEndingNode(){
+        return mapPanel.getEndingNode();
+    }
+
+    /**
+     * Returns the map object associated with this MapFrame.
+     * @return The map object associated with this MapFrame.
+     */
+    public Map getMap(){
+        return map;
+    }
+
+    /**
+     * Returns the MapFrame's GPSDevice
+     * @return This MapFrame's GPSDevice
+     */
+    public void getGPSDevice(){
+        // Not really void. Does not return GPSDevice for compilation purposes.
     }
 
 }

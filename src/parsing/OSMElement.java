@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * An object of this class represents a primary element in an OSM file.
- * A primary element is either a Node, Way, or Relation.
+ * A primary element is either a Vertex, Way, or Relation.
  */
 public class OSMElement {
 

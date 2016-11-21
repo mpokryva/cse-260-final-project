@@ -148,6 +148,7 @@ public class MapPanel extends JPanel {
                     } else if (s.equals(possibilities[1])) {
                         endingNode = map.findNearestNode(currentCoords[0], currentCoords[1]);
                     } else {
+
                         // Activate "Drive there" mode
                     }
                 }
@@ -247,7 +248,7 @@ public class MapPanel extends JPanel {
      * tip begins at the specified node.
      *
      * @param g2             The Graphics object the MapPanel uses for drawing.
-     * @param markerLocation The Node specifying the pin's location.
+     * @param markerLocation The Vertex specifying the pin's location.
      * @param color          The color of the pin.
      */
     private void drawLocationPin(Graphics2D g2, Node markerLocation, Color color) {
@@ -376,6 +377,22 @@ public class MapPanel extends JPanel {
      */
     public void setZoom(double newZoom) {
         zoom = newZoom;
+    }
+
+    /**
+     * Returns the starting node.
+     * @return The starting node.
+     */
+    public Node getStartingNode(){
+        return startingNode;
+    }
+
+    /**
+     * Returns the ending node.
+     * @return The ending node.
+     */
+    public Node getEndingNode(){
+        return endingNode;
     }
 
 
