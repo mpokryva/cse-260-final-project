@@ -13,6 +13,20 @@ import java.util.List;
 public class DirectionsGenerator {
 
     /**
+     * This generator's associated map.
+     */
+    private Map map;
+    /**
+     * This generator's associated map graph.
+     */
+    private Graph mapGraph;
+
+    /**
+     * The current (latest & relevant) path this generator has generated.
+     */
+    private List<Way> currentPath;
+
+    /**
      * Initializes a DirectionsGenerator based on the specified Map.
      */
     public DirectionsGenerator(Map map){
@@ -28,6 +42,22 @@ public class DirectionsGenerator {
      */
     public List<Way> generatePath(Node startingPoint, Node endingPoint){
         return new ArrayList<Way>();
+    }
+
+    /**
+     * Sets the current path of the generator to the specified path.
+     * @param currentPath The new current path.
+     */
+    public void setCurrentPath(List<Way> currentPath){
+        this.currentPath = currentPath;
+    }
+
+    /**
+     * Checks if way is in the current path of the generator.
+     * @return True if way in is the path. False otherwise.
+     */
+    public boolean isWayInCurrentPath(Way way){
+        return true; //FOR NOW.
     }
 
 

@@ -15,7 +15,8 @@ import java.io.File;
 /**
  * Top-level frame holding the map, the notification area, etc.
  */
-public class MapFrame extends JFrame {
+public class MapFrame extends JFrame // implements GPSListener
+{
     /**
      * Contains the actual map
      */
@@ -113,5 +114,6 @@ public class MapFrame extends JFrame {
     public void getGPSDevice(){
         // Not really void. Does not return GPSDevice for compilation purposes.
     }
+
 
 }

@@ -41,5 +41,14 @@ public class Way extends OSMElement {
         return nodeRefs;
     }
 
+    /**
+     * Checks if this way has the specified node.
+     * @param node The node to check for.
+     * @return True if way contains this node. False otherwise.
+     */
+    public boolean hasNode(Node node){
+        return nodeRefs.contains(node.getId());
+    }
+
 
 }

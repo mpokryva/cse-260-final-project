@@ -129,12 +129,28 @@ public class Map {
         return nodesInWay;
     }
 
+
+    /**
+     * Returns an array of way names.
+     *
+     * @return A array of way names.
+     */
     public String[] getWayNames() {
         String[] wayNames = new String[wayList.size()];
         for (int i = 0; i < wayList.size(); i++) {
             wayNames[i] = wayList.get(i).getName();
         }
         return wayNames;
+    }
+
+    /**
+     * Returns a list of ways that contain a node that is nearest to a specified lon and lat.
+     * @param lon The longitude to look for.
+     * @param lat The latitude to look for.
+     * @return A list of ways containing a node at this latitude and longitude.
+     */
+    public List<Way> findWaysByLonLat(double lon, double lat){
+        return new ArrayList<Way>(); // FOR NOW.
     }
 
     /**
@@ -164,6 +180,7 @@ public class Map {
 
     /**
      * Returns the center longitude of this map.
+     *
      * @return This map's center longitude.
      */
     public double getCenterLon() {
@@ -172,6 +189,7 @@ public class Map {
 
     /**
      * Returns the center latitude of this map.
+     *
      * @return This map's center latitude.
      */
     public double getCenterLat() {
@@ -180,6 +198,7 @@ public class Map {
 
     /**
      * Returns this map's ways as a list.
+     *
      * @return A list of this map's ways
      */
     public List<Way> getWayList() {
@@ -188,6 +207,7 @@ public class Map {
 
     /**
      * Returns the minimum latitude of this map.
+     *
      * @return This map's minimum latitude.
      */
     public double getMinLat() {
@@ -196,6 +216,7 @@ public class Map {
 
     /**
      * Set the minimum latitude of this map.
+     *
      * @param minLat The new minimum latitude
      */
     public void setMinLat(double minLat) {
@@ -204,6 +225,7 @@ public class Map {
 
     /**
      * Set the maximum latitude of this map.
+     *
      * @return maxLat The new maximum latitude
      */
     public double getMaxLat() {
@@ -212,6 +234,7 @@ public class Map {
 
     /**
      * Set the maximum latitude of this map.
+     *
      * @param maxLat The new maximum latitude
      */
     public void setMaxLat(double maxLat) {
@@ -220,6 +243,7 @@ public class Map {
 
     /**
      * Returns the minimum longitude of this map.
+     *
      * @return This map's minimum longitude.
      */
     public double getMinLon() {
@@ -228,6 +252,7 @@ public class Map {
 
     /**
      * Set the minimum longitude of this map.
+     *
      * @param minLon The new minimum longitude
      */
     public void setMinLon(double minLon) {
@@ -236,6 +261,7 @@ public class Map {
 
     /**
      * Set the maximum longitude of this map.
+     *
      * @return maxLon The new minimum longitude
      */
     public double getMaxLon() {
@@ -244,6 +270,7 @@ public class Map {
 
     /**
      * Set the maximum longitude of this map.
+     *
      * @param maxLon The new maximum longitude
      */
     public void setMaxLon(double maxLon) {
