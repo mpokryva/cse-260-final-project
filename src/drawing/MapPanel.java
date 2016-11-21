@@ -1,26 +1,19 @@
 package drawing;
 
-import javafx.scene.shape.Circle;
 import parsing.Map;
 import parsing.Node;
-import parsing.OSMParser;
 import parsing.Way;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.Point;
 import java.awt.event.*;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
