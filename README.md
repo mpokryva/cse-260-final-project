@@ -9,7 +9,7 @@ out in diagrams, the result is redundant, and sometimes lacking methods.
 
 I have left the main frame description and use cases from handin 2 for your convenience.
 
-The MapFrame class, which is the top level class, does not have some UI components fully
+The MapFrame class, the top level class, does not have some UI components fully
 implemented yet. This is because they were not required to do the things specified in this
 handin. I am planning to implement and polish them up over the upcoming break and periodically
 push them to my Git server.
