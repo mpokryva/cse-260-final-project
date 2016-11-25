@@ -20,6 +20,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +48,19 @@ public class MapPanel extends JPanel {
      * The center latitude, in map coordinates of this map.
      */
     private double centerLat;
+
+    /**
+     * The amount of "clicks" the mouse wheel has moved from the default zoom.
+     */
+    private int mouseWheelClicks;
+    /**
+     * Maximum zoom out (in clicks)
+     */
+    private static int MAXIMUM_ZOOM_OUT = -20;
+    /**
+     * Maximum zoom in (in clicks)
+     */
+    private static int MAXIMUM_ZOOM_IN = 30;
     /**
      * Images of pin icons, like in Google Maps. Will implement in the future.
      */
@@ -167,27 +181,32 @@ public class MapPanel extends JPanel {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 double amountRotated = -1 * e.getPreciseWheelRotation();
-                double scaleFactor = 10;
-                double zoomScaleFactor = zoom / scaleFactor; //10 chosen randomly.
-                double amountToZoom = amountRotated * zoomScaleFactor;
-                zoom += amountToZoom;
+                // Makes sure user can't zoom infinitely in or out.
+                if ((mouseWheelClicks >= MAXIMUM_ZOOM_OUT || amountRotated > 0) &&
+                        (mouseWheelClicks <= MAXIMUM_ZOOM_IN || amountRotated < 0)){
+                    double scaleFactor = 10;    //10 chosen arbitrarily.
+                    double zoomScaleFactor = zoom / scaleFactor;
+                    double amountToZoom = amountRotated * zoomScaleFactor;
+                    zoom += amountToZoom;
+                    mouseWheelClicks += amountRotated;
+                    double[] currentCoords = getMouseLocationAsCoords(e);
 
-                double[] currentCoords = getMouseLocationAsCoords(e);
-
-                if (currentCoords[0] != prevMouseCoords[0] || currentCoords[1] != prevMouseCoords[1]) {
-                    if (amountRotated > 0) {
-                        setCenterCoords(centerLon + ((currentCoords[0] - centerLon) / scaleFactor), centerLat + ((currentCoords[1] - centerLat) / scaleFactor));
-                    } else {
-                        setCenterCoords(centerLon - ((currentCoords[0] - centerLon) / scaleFactor), centerLat - ((currentCoords[1] - centerLat) / scaleFactor));
+                    if (currentCoords[0] != prevMouseCoords[0] || currentCoords[1] != prevMouseCoords[1]) {
+                        if (amountRotated > 0) {
+                            setCenterCoords(centerLon + ((currentCoords[0] - centerLon) / scaleFactor), centerLat + ((currentCoords[1] - centerLat) / scaleFactor));
+                        } else {
+                            setCenterCoords(centerLon - ((currentCoords[0] - centerLon) / scaleFactor), centerLat - ((currentCoords[1] - centerLat) / scaleFactor));
+                        }
+                        prevMouseCoords[0] = currentCoords[0];
+                        prevMouseCoords[1] = currentCoords[1];
                     }
-                    prevMouseCoords[0] = currentCoords[0];
-                    prevMouseCoords[1] = currentCoords[1];
-                }
 
-                repaint();
+                    repaint();
+                }
             }
         });
     }
+
 
     /**
      * Sets the center coordinates of this map.
@@ -212,26 +231,31 @@ public class MapPanel extends JPanel {
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         super.paintComponent(g2);
+        this.setBackground(new Color(234, 234, 234));
         List<Way> wayList = map.getWayList();
         for (Way way : wayList) {
+            g.setColor(way.getColor());
+            if (way.getColor().equals(new Color(253, 232, 173))) {
+                int i = 3;
+            }
             List<Node> nodesInWay = map.findNodesInWay(way);
             double[] previousCoords = new double[2];
-            for (Node node : nodesInWay) {
-                double lat = node.getLat();
-                double lon = node.getLon();
+            Node firstNode = nodesInWay.get(0);
+            double firstLat = convertLatToPixels(firstNode.getLat());
+            double firstLon = convertLonToPixels(firstNode.getLon(), firstNode.getLat());
+            Path2D.Double wayLine = new Path2D.Double();
+            wayLine.moveTo(firstLon, firstLat);
+            for (int i = 1; i < nodesInWay.size(); i++) {
+                double lat = nodesInWay.get(i).getLat();
+                double lon = nodesInWay.get(i).getLon();
                 double pixelLat = convertLatToPixels(lat);
                 double pixelLon = convertLonToPixels(lon, lat);
-                Line2D.Double dot = new Line2D.Double(pixelLon, pixelLat, pixelLon, pixelLat);
-                Line2D.Double prevLine = new Line2D.Double(previousCoords[0], previousCoords[1], pixelLon, pixelLat);
-                if (this.getBounds().contains(dot.getX1(), dot.getY1())) {
-                    if (previousCoords[0] != 0) {
-                        g2.draw(prevLine);
-                    }
-                }
-                previousCoords[0] = pixelLon;
-                previousCoords[1] = pixelLat;
-                g2.draw(dot);
+                wayLine.lineTo(pixelLon, pixelLat);
             }
+            g2.setColor(way.getColor());
+            g2.setStroke(new BasicStroke(way.getWayThickness()+mouseWheelClicks/10));
+            g2.draw(wayLine);
+
         }
 
         if (startingNode != null) {
@@ -381,17 +405,19 @@ public class MapPanel extends JPanel {
 
     /**
      * Returns the starting node.
+     *
      * @return The starting node.
      */
-    public Node getStartingNode(){
+    public Node getStartingNode() {
         return startingNode;
     }
 
     /**
      * Returns the ending node.
+     *
      * @return The ending node.
      */
-    public Node getEndingNode(){
+    public Node getEndingNode() {
         return endingNode;
     }
 

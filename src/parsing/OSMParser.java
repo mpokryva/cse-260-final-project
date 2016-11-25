@@ -1,5 +1,6 @@
 package parsing;
 
+import java.awt.*;
 import java.io.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -160,11 +161,56 @@ public class OSMParser {
                                String qName) throws SAXParseException {
             // Element is primary (node, way, or relation).
             if (qName.equals("node") || qName.equals("way") || qName.equals("relation")) {
+                OSMElement currentPrimaryElement = elementHandler.getCurrentPrimaryElement();
+                if (currentPrimaryElement.getClass() == Way.class){
+                    Way currentWay = (Way)currentPrimaryElement;
+                    setWayColor(currentWay);
+                }
                 map.addElement(elementHandler.getCurrentPrimaryElement());
             }
 
             System.out.println("endElement: " + namespaceURI + ","
                     + localName + "," + qName);
+        }
+
+        private void setWayColor(Way wayToAdd){
+            String highWayType = wayToAdd.getTag("highway");
+            if (wayToAdd.getTag("natural") != null && wayToAdd.getTag("natural").equals("water")){
+                wayToAdd.setColor(new Color(167,205,242)); //blue
+            }
+            if (highWayType != null){
+                switch (highWayType){
+                    case ("motorway"):
+                        wayToAdd.setColor(new Color(242, 178, 75));
+                        wayToAdd.setWayThickness(3);
+                        break;
+                    case ("trunk"):
+                        wayToAdd.setColor(new Color(253, 232, 173));
+                        wayToAdd.setWayThickness(5);
+                        break;
+                    case ("primary"):
+                        wayToAdd.setColor(new Color(253, 232, 173));
+                        wayToAdd.setWayThickness(4);
+                        break;
+                    case ("secondary"):
+                        wayToAdd.setColor(Way.getDefaultColor());
+                        wayToAdd.setWayThickness(3);
+                        break;
+                    case ("tertiary"):
+                        wayToAdd.setColor(Way.getDefaultColor());
+                        wayToAdd.setWayThickness(3);
+                        break;
+                    case ("unclassified"):
+                        wayToAdd.setColor(Way.getDefaultColor());
+                        wayToAdd.setWayThickness(2);
+                        break;
+                    case ("residential"):
+                        wayToAdd.setColor(Way.getDefaultColor());
+                        wayToAdd.setWayThickness(2);
+                        break;
+                }
+            }
+
         }
 
         /**

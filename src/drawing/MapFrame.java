@@ -1,5 +1,8 @@
 package drawing;
 
+import com.starkeffect.highway.GPSDevice;
+import com.starkeffect.highway.GPSEvent;
+import com.starkeffect.highway.GPSListener;
 import navigation.DirectionsGenerator;
 import navigation.Person;
 import parsing.Map;
@@ -15,7 +18,7 @@ import java.io.File;
 /**
  * Top-level frame holding the map, the notification area, etc.
  */
-public class MapFrame extends JFrame // implements GPSListener
+public class MapFrame extends JFrame implements GPSListener
 {
     /**
      * Contains the actual map
@@ -43,6 +46,11 @@ public class MapFrame extends JFrame // implements GPSListener
      * Not yet implemented.
      */
     private String mode;
+
+    private GPSDevice gpsDevice;
+
+    private double currentLon;
+    private double currentLat;
     /**
      * Initializes this MapFrame based upon the supplied Map object.
      * @param map The Map to represent this MapFrame.
@@ -51,6 +59,8 @@ public class MapFrame extends JFrame // implements GPSListener
     public MapFrame(Map map){
         this.map = map;
         directionsGenerator = new DirectionsGenerator(map);
+       // gpsDevice = new GPSDevice();
+        //gpsDevice.addGPSListener(new Person());
         this.setLayout(new BorderLayout());
         this.mapPanel = new MapPanel(map);
         this.notificationPanel = new NotificationPanel(500, 300);
@@ -87,6 +97,15 @@ public class MapFrame extends JFrame // implements GPSListener
         parser.parse();
         MapFrame mapFrame = new MapFrame(parser.getMap());
         System.out.println("Hello");
+
+
+    }
+
+    @Override
+    public void processEvent(GPSEvent e){
+        currentLon = e.getLongitude();
+        currentLat = e.getLatitude();
+
     }
 
     /**

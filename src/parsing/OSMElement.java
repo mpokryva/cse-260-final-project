@@ -21,11 +21,13 @@ public class OSMElement {
     /**
      * List of attributes such as uis, version, changeset, etc.
      */
-    private HashMap<String, String> attributeList;
+    private HashMap<String, String> attributeMap;
     /**
      * List of tags of this element.
      */
     private List<Tag> tagList;
+
+    private HashMap<String, String> tagMap;
 
     /**
      * Initializes an OSMElement with the given ID>
@@ -33,8 +35,9 @@ public class OSMElement {
      * @param id The ID of this OSMElement.
      */
     public OSMElement(String id) {
-        attributeList = new HashMap<>();
+        attributeMap = new HashMap<>();
         tagList = new ArrayList<>();
+        tagMap = new HashMap<>();
         this.id = id;
         this.name = "";
     }
@@ -52,18 +55,39 @@ public class OSMElement {
      * @param type  The attributes type (uid, changeset, etc.)
      * @param value The value of this attribute.
      */
-    void addAttribute(String type, String value) {
-        attributeList.put(type, value);
+    public void addAttribute(String type, String value) {
+        attributeMap.put(type, value);
     }
 
     /**
-     * Adds a tag to this element's list of tags.
+     * Returns an attribute given its key.
+     * @param attrKey The attribute key
+     * @return The attribute value.
+     */
+    public String getAttr(String attrKey){
+        return attributeMap.get(attrKey);
+    }
+
+    /**
+     * Adds a tag to this element's list and HashMap of tags.
      *
      * @param tagToAdd The tag to add.
      */
-    void addTag(Tag tagToAdd) {
+    public void addTag(Tag tagToAdd) {
         tagList.add(tagToAdd);
+        tagMap.put(tagToAdd.getKey(), tagToAdd.getValue(tagToAdd.getKey()));
     }
+
+    /**
+     * Returns the tag value matching the specified key.
+     * @param tagKey The tag's key.
+     * @return The tag's value.
+     */
+    public String getTag(String tagKey){
+        return tagMap.get(tagKey);
+    }
+
+
 
     public String getName() {
         return name;

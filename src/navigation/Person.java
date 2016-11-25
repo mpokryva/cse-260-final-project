@@ -1,5 +1,7 @@
 package navigation;
 
+import com.starkeffect.highway.GPSEvent;
+import com.starkeffect.highway.GPSListener;
 import parsing.Map;
 import parsing.Way;
 
@@ -7,7 +9,7 @@ import parsing.Way;
  * Class that represents a person on the map. Implements the GPSListener interface
  * Updates his/her current coordinates from the GPSListener method processEvent(GPSEvent e).
  */
-public class Person // implements GPSListener
+public class Person implements GPSListener
  {
     /**
      * This person's current longitude
@@ -32,11 +34,12 @@ public class Person // implements GPSListener
 
     }
 
-    /**
-    public void processEvent(GPSEvent e){
 
+    public void processEvent(GPSEvent e){
+        currentLon = e.getLongitude();
+        currentLat = e.getLatitude();
     }
-     **/
+
 
     public double getCurrentLon() {
         return currentLon;

@@ -1,5 +1,6 @@
 package parsing;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,26 @@ public class Way extends OSMElement {
     private List<String> nodeRefs;
 
     /**
+     * The color of this way.
+     */
+    private Color wayColor;
+
+    /**
+     * The default way color (white).
+     */
+    private static final Color DEFAULT_COLOR = new Color(254, 254, 254);
+
+    /**
+     * The thickness of the way (in pixels)
+     */
+    private float wayThickness;
+
+    /**
+     * The default way thickness (pixels)
+     */
+    private static final float DEFAULT_THICKNESS=2; // FOR NOW
+
+    /**
      * Initializes a way with the given ID.
      *
      * @param id The ID of this way.
@@ -21,6 +42,8 @@ public class Way extends OSMElement {
     public Way(String id) {
         super(id);
         nodeRefs = new ArrayList<>();
+        setColor(DEFAULT_COLOR);
+        setWayThickness(DEFAULT_THICKNESS);
     }
 
     /**
@@ -50,5 +73,42 @@ public class Way extends OSMElement {
         return nodeRefs.contains(node.getId());
     }
 
+    /**
+     * Sets the color of the way to the specified color.
+     * @param color The new color of this way.
+     */
+    public void setColor(Color color){
+        wayColor = color;
+    }
 
+    /**
+     * Returns this way's color.
+     * @return This way's color.
+     */
+    public Color getColor(){
+        return wayColor;
+    }
+
+    /**
+     * Returns this way's thickness.
+     * @return This way's thickness.
+     */
+    public float getWayThickness() {
+        return wayThickness;
+    }
+
+    /** Sets the thickness of this way to the specified thickness, in pixels.
+     * @param wayThickness The new thickness of this way.
+     */
+    public void setWayThickness(float wayThickness) {
+        this.wayThickness = wayThickness;
+    }
+
+    /**
+     * Returns the default way color (white).
+     * @return The default way color (white).
+     */
+    public static Color getDefaultColor() {
+        return DEFAULT_COLOR;
+    }
 }
