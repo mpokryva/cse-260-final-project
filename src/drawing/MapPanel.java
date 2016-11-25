@@ -77,13 +77,6 @@ public class MapPanel extends JPanel {
      */
     private Node endingNode;
 
-    private double MOTORWAY_THRESHOLD = 3000;
-    private double TRUNK_THRESHOLD = 4000;
-    private double PRIMARY_THRESHOLD = 5000;
-    private double SECONDARY_THRESHOLD = 6000;
-    private double TERTIARY_THRESHOLD = 7000;
-    private double UNCLASSIFIED_THRESHOLD = 15000;
-    private double RESIDENTIAL_THRESHOLD = 20000;
 
     /**
      * Initializes the fields of this MapPanel, and not much else.
@@ -241,27 +234,40 @@ public class MapPanel extends JPanel {
         this.setBackground(new Color(234, 234, 234));
         List<Way> wayList = map.getWayList();
         for (Way way : wayList) {
-            g.setColor(way.getColor());
-            if (way.getColor().equals(new Color(253, 232, 173))) {
-                int i = 3;
+            int wayPriority = way.getWayPriority();
+            if (wayPriority == Way.Priority.BUILDING.getPriority()){
+                int i =3;
             }
-            List<Node> nodesInWay = map.findNodesInWay(way);
-            Node firstNode = nodesInWay.get(0);
-            double firstLat = convertLatToPixels(firstNode.getLat());
-            double firstLon = convertLonToPixels(firstNode.getLon(), firstNode.getLat());
-            Path2D.Double wayLine = new Path2D.Double();
-            wayLine.moveTo(firstLon, firstLat);
-            for (int i = 1; i < nodesInWay.size(); i++) {
-                double lat = nodesInWay.get(i).getLat();
-                double lon = nodesInWay.get(i).getLon();
-                double pixelLat = convertLatToPixels(lat);
-                double pixelLon = convertLonToPixels(lon, lat);
-                wayLine.lineTo(pixelLon, pixelLat);
+            if (wayPriority*1000 < zoom){
+                g.setColor(way.getColor());
+                if (way.getColor().equals(new Color(253, 232, 173))) {
+                    int i = 3;
+                }
+                List<Node> nodesInWay = map.findNodesInWay(way);
+                Node firstNode = nodesInWay.get(0);
+                double firstLat = convertLatToPixels(firstNode.getLat());
+                double firstLon = convertLonToPixels(firstNode.getLon(), firstNode.getLat());
+                Path2D.Double wayLine = new Path2D.Double();
+                wayLine.moveTo(firstLon, firstLat);
+                for (int i = 1; i < nodesInWay.size(); i++) {
+                    double lat = nodesInWay.get(i).getLat();
+                    double lon = nodesInWay.get(i).getLon();
+                    double pixelLat = convertLatToPixels(lat);
+                    double pixelLon = convertLonToPixels(lon, lat);
+                    wayLine.lineTo(pixelLon, pixelLat);
+                }
+                g2.setColor(way.getColor());
+                g2.setStroke(new BasicStroke(way.getWayThickness() + mouseWheelClicks / 10));
+                Node lastNode = nodesInWay.get(nodesInWay.size()-1);
+                /*
+                If the way is a loop, we fill it.
+                 */
+                if (way.isWater()){
+                   // wayLine.closePath();
+                    g2.fill(wayLine);
+                }
+                g2.draw(wayLine);
             }
-            g2.setColor(way.getColor());
-            g2.setStroke(new BasicStroke(way.getWayThickness() + mouseWheelClicks / 10));
-            g2.draw(wayLine);
-
         }
 
         if (startingNode != null) {

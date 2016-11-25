@@ -24,15 +24,17 @@ public class Way extends OSMElement {
      */
     private float wayThickness;
     /**
-     * The thickness of the way (useful for drawing a clearer map). Scale of 1-10. 1 is highest thickness.
-     */
-    private int wayPriority;
-
-
-    /**
      * The significance of the way (helps with drawing a cleaner map). Scale of 1-10.
      * Lower numbers correspond to a blank significance.
      */
+    private int wayPriority;
+
+    /**
+     * True if the way is a type of water feature(stream, lake, etc).
+     * NOT exhaustive. Made to help map look nicer.
+     */
+    private boolean isWater;
+
     /**
      * Initializes a way with the given ID.
      *
@@ -145,6 +147,21 @@ public class Way extends OSMElement {
         return Priority.DEFAULT.getPriority();
     }
 
+    /**
+     * Returns a boolean value indicating whether this way is a water feature.
+     * @return Returns true if the way is a water feature. False otherwise.
+     */
+    public boolean isWater() {
+        return isWater;
+    }
+
+    /**
+     * Sets the water feature flag of this way to the specified value.
+     * @param isWater True if a water feature. False otherwise.
+     */
+    public void setWater(boolean isWater) {
+        this.isWater = isWater;
+    }
 
     /**
      * Created by mpokr on 11/25/2016.
@@ -157,8 +174,8 @@ public class Way extends OSMElement {
         SECONDARY(4),
         TERTIARY(5),
         UNCLASSIFIED(6),
-        RESIDENTIAL(6),
-        BUILDING(7),
+        RESIDENTIAL(15),
+        BUILDING(10),
         DEFAULT(6);
 
         private int priority;
@@ -179,15 +196,15 @@ public class Way extends OSMElement {
         PRIMARY(4),
         SECONDARY(3),
         TERTIARY(3),
-        UNCLASSIFIED(2),
-        RESIDENTIAL(2),
-        BUILDING(1),
+        UNCLASSIFIED(1),
+        RESIDENTIAL(1),
+        BUILDING(0.5f),
         DEFAULT(2);
 
         private float thickness;
 
-        Thickness(int priority) {
-            this.thickness = priority;
+        Thickness(float thickness) {
+            this.thickness = thickness;
         }
 
         public float getThickness() {

@@ -65,7 +65,13 @@ public class MapFrame extends JFrame implements GPSListener
         this.mapPanel = new MapPanel(map);
         this.notificationPanel = new NotificationPanel(500, 300);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int screenWidth = gd.getDisplayMode().getWidth();
+        int screenHeight = gd.getDisplayMode().getHeight();
+        int frameWidth = screenWidth - 100; // Makes the frame a bit smaller than the screen size.
+        int frameHeight = screenHeight - 100;
+        this.setSize(frameWidth, frameHeight);
+        this.setLocation(screenWidth/2 - frameWidth/2, screenHeight/2 - frameHeight/2);
         this.add(mapPanel, BorderLayout.CENTER);
         this.add(notificationPanel, BorderLayout.SOUTH);
         this.setVisible(true);
