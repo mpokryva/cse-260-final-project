@@ -176,38 +176,54 @@ public class OSMParser {
         private void setWayColor(Way wayToAdd){
             String highWayType = wayToAdd.getTag("highway");
             if (wayToAdd.getTag("natural") != null && wayToAdd.getTag("natural").equals("water")){
-                wayToAdd.setColor(new Color(167,205,242)); //blue
+                wayToAdd.setColor(Way.WayColor.WATER.getColor());
+            }
+            if (wayToAdd.getTag("building") != null && wayToAdd.getTag("building").equals("yes")){
+                wayToAdd.setColor(Way.WayColor.BUILDING.getColor());
+                wayToAdd.setWayThickness(Way.Thickness.BUILDING.getThickness());
+                wayToAdd.setWayPriority(Way.Priority.BUILDING.getPriority());
             }
             if (highWayType != null){
                 switch (highWayType){
                     case ("motorway"):
-                        wayToAdd.setColor(new Color(242, 178, 75));
-                        wayToAdd.setWayThickness(3);
+                        wayToAdd.setColor(Way.WayColor.MOTORWAY.getColor());
+                        wayToAdd.setWayThickness(Way.Thickness.MOTORWAY.getThickness());
+                        wayToAdd.setWayPriority(Way.Priority.MOTORWAY.getPriority());
                         break;
                     case ("trunk"):
-                        wayToAdd.setColor(new Color(253, 232, 173));
-                        wayToAdd.setWayThickness(5);
+                        wayToAdd.setColor(Way.WayColor.TRUNK.getColor());
+                        wayToAdd.setWayThickness(Way.Thickness.TRUNK.getThickness());
+                        wayToAdd.setWayPriority(Way.Priority.TRUNK.getPriority());
                         break;
                     case ("primary"):
-                        wayToAdd.setColor(new Color(253, 232, 173));
-                        wayToAdd.setWayThickness(4);
+                        wayToAdd.setColor(Way.WayColor.PRIMARY.getColor());
+                        wayToAdd.setWayThickness(Way.Thickness.PRIMARY.getThickness());
+                        wayToAdd.setWayPriority(Way.Priority.PRIMARY.getPriority());
                         break;
                     case ("secondary"):
-                        wayToAdd.setColor(Way.getDefaultColor());
-                        wayToAdd.setWayThickness(3);
+                        wayToAdd.setColor(Way.WayColor.SECONDARY.getColor());
+                        wayToAdd.setWayThickness(Way.Thickness.SECONDARY.getThickness());
+                        wayToAdd.setWayPriority(Way.Priority.SECONDARY.getPriority());
                         break;
                     case ("tertiary"):
-                        wayToAdd.setColor(Way.getDefaultColor());
-                        wayToAdd.setWayThickness(3);
+                        wayToAdd.setColor(Way.WayColor.TERTIARY.getColor());
+                        wayToAdd.setWayThickness(Way.Thickness.TERTIARY.getThickness());
+                        wayToAdd.setWayPriority(Way.Priority.TERTIARY.getPriority());
                         break;
                     case ("unclassified"):
-                        wayToAdd.setColor(Way.getDefaultColor());
-                        wayToAdd.setWayThickness(2);
+                        wayToAdd.setColor(Way.WayColor.UNCLASSIFIED.getColor());
+                        wayToAdd.setWayThickness(Way.Thickness.UNCLASSIFIED.getThickness());
+                        wayToAdd.setWayPriority(Way.Priority.UNCLASSIFIED.getPriority());
                         break;
                     case ("residential"):
-                        wayToAdd.setColor(Way.getDefaultColor());
-                        wayToAdd.setWayThickness(2);
+                        wayToAdd.setColor(Way.WayColor.RESIDENTIAL.getColor());
+                        wayToAdd.setWayThickness(Way.Thickness.RESIDENTIAL.getThickness());
+                        wayToAdd.setWayPriority(Way.Priority.RESIDENTIAL.getPriority());
                         break;
+                    default:
+                        wayToAdd.setColor(Way.WayColor.DEFAULT.getColor());
+                        wayToAdd.setWayThickness(Way.Thickness.DEFAULT.getThickness());
+                        wayToAdd.setWayPriority(Way.Priority.DEFAULT.getPriority());
                 }
             }
 

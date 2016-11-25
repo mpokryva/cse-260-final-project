@@ -60,7 +60,7 @@ public class MapPanel extends JPanel {
     /**
      * Maximum zoom in (in clicks)
      */
-    private static int MAXIMUM_ZOOM_IN = 30;
+    private static int MAXIMUM_ZOOM_IN = 40;
     /**
      * Images of pin icons, like in Google Maps. Will implement in the future.
      */
@@ -76,6 +76,14 @@ public class MapPanel extends JPanel {
      * The node marked as the ending location.
      */
     private Node endingNode;
+
+    private double MOTORWAY_THRESHOLD = 3000;
+    private double TRUNK_THRESHOLD = 4000;
+    private double PRIMARY_THRESHOLD = 5000;
+    private double SECONDARY_THRESHOLD = 6000;
+    private double TERTIARY_THRESHOLD = 7000;
+    private double UNCLASSIFIED_THRESHOLD = 15000;
+    private double RESIDENTIAL_THRESHOLD = 20000;
 
     /**
      * Initializes the fields of this MapPanel, and not much else.
@@ -183,7 +191,7 @@ public class MapPanel extends JPanel {
                 double amountRotated = -1 * e.getPreciseWheelRotation();
                 // Makes sure user can't zoom infinitely in or out.
                 if ((mouseWheelClicks >= MAXIMUM_ZOOM_OUT || amountRotated > 0) &&
-                        (mouseWheelClicks <= MAXIMUM_ZOOM_IN || amountRotated < 0)){
+                        (mouseWheelClicks <= MAXIMUM_ZOOM_IN || amountRotated < 0)) {
                     double scaleFactor = 10;    //10 chosen arbitrarily.
                     double zoomScaleFactor = zoom / scaleFactor;
                     double amountToZoom = amountRotated * zoomScaleFactor;
@@ -200,7 +208,6 @@ public class MapPanel extends JPanel {
                         prevMouseCoords[0] = currentCoords[0];
                         prevMouseCoords[1] = currentCoords[1];
                     }
-
                     repaint();
                 }
             }
@@ -239,7 +246,6 @@ public class MapPanel extends JPanel {
                 int i = 3;
             }
             List<Node> nodesInWay = map.findNodesInWay(way);
-            double[] previousCoords = new double[2];
             Node firstNode = nodesInWay.get(0);
             double firstLat = convertLatToPixels(firstNode.getLat());
             double firstLon = convertLonToPixels(firstNode.getLon(), firstNode.getLat());
@@ -253,7 +259,7 @@ public class MapPanel extends JPanel {
                 wayLine.lineTo(pixelLon, pixelLat);
             }
             g2.setColor(way.getColor());
-            g2.setStroke(new BasicStroke(way.getWayThickness()+mouseWheelClicks/10));
+            g2.setStroke(new BasicStroke(way.getWayThickness() + mouseWheelClicks / 10));
             g2.draw(wayLine);
 
         }
