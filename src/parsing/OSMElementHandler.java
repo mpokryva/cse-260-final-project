@@ -182,7 +182,7 @@ public class OSMElementHandler {
                     currentRelationMember.setType(value);
                     break;
                 case "ref":
-                    currentRelationMember.setRef(value);
+                    currentRelationMember.setRefId(value);
                     break;
                 case "role":
                     currentRelationMember.setRole(value);

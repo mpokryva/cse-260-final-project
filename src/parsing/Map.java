@@ -12,6 +12,7 @@ public class Map {
     List<Node> nodeList;     // List of nodes
     HashMap<String, Node> idToNodeMap;  // Map of id's of Nodes to Nodes.
     HashMap<String, Node> nameToNodeMap; // Map of names of Nodes to Nodes.
+    HashMap<String, Way> idToWayMap;     // Map of id's of Ways to Ways.
     HashMap<String, Way> nameToWayMap;  // Map of names of Ways to Ways.
     List<Way> wayList;  // List of ways.
     List<Relation> relationList;    // List of relations
@@ -30,6 +31,7 @@ public class Map {
         relationList = new ArrayList<>();
         idToNodeMap = new HashMap<>();
         nameToWayMap = new HashMap<>();
+        idToWayMap = new HashMap<>();
         minLat = Integer.MAX_VALUE;
         maxLat = Integer.MIN_VALUE;
         minLon = Integer.MAX_VALUE;
@@ -111,6 +113,16 @@ public class Map {
         return null;
     }
 
+    /**
+     * Returns the way associated with the specified id.
+     *
+     * @param id The id of the way to find.
+     * @return The way, if it can be found. Null otherwise.
+     */
+    public Way findWayById(String id) {
+        return idToWayMap.get(id);
+    }
+
 
     /**
      * Finds node objects that a way contains.
@@ -146,12 +158,29 @@ public class Map {
 
     /**
      * Returns a list of ways that contain a node that is nearest to a specified lon and lat.
+     *
      * @param lon The longitude to look for.
      * @param lat The latitude to look for.
      * @return A list of ways containing a node at this latitude and longitude.
      */
-    public List<Way> findWaysByLonLat(double lon, double lat){
-        return new ArrayList<Way>(); // FOR NOW.
+    public List<Way> findWaysByLonLat(double lon, double lat) {
+        Node nearestNode = findNearestNode(lon, lat);
+        return findWaysByNode(nearestNode);
+    }
+
+    /**
+     * Returns a list of ways that contains the specified node.
+     * @param node The node to look for.
+     * @return A list of nodes containing the specified node.
+     */
+    public List<Way> findWaysByNode(Node node){
+        ArrayList<Way> waysContainingNode = new ArrayList<>();
+        for (Way way : wayList){
+            if (way.hasNode(node)){
+                waysContainingNode.add(way);
+            }
+        }
+        return waysContainingNode;
     }
 
     /**

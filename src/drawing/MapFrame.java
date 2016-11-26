@@ -88,8 +88,8 @@ public class MapFrame extends JFrame implements GPSListener
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 double[] currentMouseCoords = mapPanel.getMouseLocationAsCoords(e);
-                currentMouseCoords[0] = Math.round(currentMouseCoords[0]*100.0)/100.0;
-                currentMouseCoords[1] = Math.round(currentMouseCoords[1]*100.0)/100.0;
+                //currentMouseCoords[0] = Math.round(currentMouseCoords[0]*100.0)/100.0;
+                //currentMouseCoords[1] = Math.round(currentMouseCoords[1]*100.0)/100.0;
                 notificationPanel.setText("Coordinates clicked: " + currentMouseCoords[0] + ", " +
                                                 currentMouseCoords[1]);
                 System.out.println("Map clicked");

@@ -34,7 +34,11 @@ public class Way extends OSMElement {
      * NOT exhaustive. Made to help map look nicer.
      */
     private boolean isWater;
-
+    /**
+     * True if the way is a boundary.
+     * NOT exhaustive. Made to help map look nicer.
+     */
+    private boolean isBoundary;
     /**
      * Initializes a way with the given ID.
      *
@@ -161,6 +165,22 @@ public class Way extends OSMElement {
      */
     public void setWater(boolean isWater) {
         this.isWater = isWater;
+    }
+
+    /**
+     * Returns a boolean value indicating whether this way is a boundary.
+     * @return Returns true if the way is a boundary. False otherwise.
+     */
+    public boolean isBoundary() {
+        return isBoundary;
+    }
+
+    /**
+     * Sets the boundary flag of this way to the specified value.
+     * @param isBoundary True if a boundary. False otherwise.
+     */
+    public void setBoundary(boolean isBoundary) {
+        this.isBoundary = isBoundary;
     }
 
     /**

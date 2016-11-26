@@ -32,4 +32,12 @@ public class Relation extends OSMElement {
     public void addMember(RelationMember member) {
         memberList.add(member);
     }
+
+    /**
+     * Returns a list this relation's members.
+     * @return A list of this relation's members.
+     */
+    public List<RelationMember> getMemberList() {
+        return memberList;
+    }
 }

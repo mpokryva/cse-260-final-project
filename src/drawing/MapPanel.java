@@ -20,6 +20,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +93,7 @@ public class MapPanel extends JPanel {
         centerLon = map.getCenterLon() + RIGHT_SHIFT;
         centerLat = map.getCenterLat();
         addRightMouseClickListener();
+        addDoubleClickListener();
         try {
             STARTING_PIN_ICON = ImageIO.read(new File("GreenPinIcon.png"));
             ENDING_PIN_ICON = ImageIO.read(new File("RedPinIcon.png"));
@@ -173,6 +175,23 @@ public class MapPanel extends JPanel {
 
     }
 
+    private void addDoubleClickListener(){
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (e.getClickCount() == 2){
+                    double[] mapCoords = getMouseLocationAsCoords(e);
+                    List<Way> wayList = map.findWaysByLonLat(mapCoords[0], mapCoords[1]);
+                    for (Way way : wayList){
+                        System.out.println(way.getName());
+                    }
+                    System.out.println(map.findNearestNode(mapCoords[0], mapCoords[1]).getId());
+                }
+            }
+        });
+    }
+
     /**
      * Adds a listener for user mouse-wheel scrolling.
      */
@@ -240,9 +259,6 @@ public class MapPanel extends JPanel {
             }
             if (wayPriority*1000 < zoom){
                 g.setColor(way.getColor());
-                if (way.getColor().equals(new Color(253, 232, 173))) {
-                    int i = 3;
-                }
                 List<Node> nodesInWay = map.findNodesInWay(way);
                 Node firstNode = nodesInWay.get(0);
                 double firstLat = convertLatToPixels(firstNode.getLat());

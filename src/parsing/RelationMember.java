@@ -15,7 +15,7 @@ public class RelationMember {
     /**
      * The reference id of this relation member.
      */
-    private String ref;
+    private String refId;
     /**
      * The role of this relation member.
      */
@@ -45,10 +45,10 @@ public class RelationMember {
     /**
      * Sets the reference ID of this relation member to the specified reference ID.
      *
-     * @param ref The relation member's new reference ID.
+     * @param refId The relation member's new reference ID.
      */
-    public void setRef(String ref) {
-        this.ref = ref;
+    public void setRefId(String refId) {
+        this.refId = refId;
     }
 
     /**
@@ -76,5 +76,37 @@ public class RelationMember {
      */
     public String getType() {
         return type;
+    }
+
+    /**
+     * Checks if this relation member is of type "way".
+     * @return True if of type "way". False otherwise.
+     */
+    public boolean isWay(){
+        return type.equals("way");
+    }
+
+    /**
+     * Checks if this relation member is of type "node".
+     * @return True if of type "node". False otherwise.
+     */
+    public boolean isNode(){
+        return type.equals("node");
+    }
+
+    /**
+     * Checks if this relation member is of type "relation".
+     * @return True if of type "relation". False otherwise.
+     */
+    public boolean isRelation(){
+        return type.equals("relation");
+    }
+
+    /**
+     * Returns the reference ID of this relation member.
+     * @return The reference ID of this relation member.
+     */
+    public String getRefId() {
+        return refId;
     }
 }

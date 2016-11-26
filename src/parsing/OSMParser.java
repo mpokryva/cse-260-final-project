@@ -27,7 +27,7 @@ public class OSMParser {
      */
     private File file;
     /**
-     *   Converts parsed XML String to OSMElements
+     * Converts parsed XML String to OSMElements
      */
     private OSMElementHandler elementHandler;
     /**
@@ -74,9 +74,10 @@ public class OSMParser {
 
     /**
      * Returns this parser's associated Map object.
+     *
      * @return This parser's associated Map object.
      */
-    public Map getMap(){
+    public Map getMap() {
         return map;
     }
 
@@ -145,7 +146,6 @@ public class OSMParser {
             // Element is secondary (nd, tag, etc).
 
 
-
             if (atts.getLength() > 0)
                 showAttrs(qName, atts);
 
@@ -162,9 +162,21 @@ public class OSMParser {
             // Element is primary (node, way, or relation).
             if (qName.equals("node") || qName.equals("way") || qName.equals("relation")) {
                 OSMElement currentPrimaryElement = elementHandler.getCurrentPrimaryElement();
-                if (currentPrimaryElement.getClass() == Way.class){
-                    Way currentWay = (Way)currentPrimaryElement;
-                    setWayColor(currentWay);
+                if (currentPrimaryElement.getClass() == Way.class) {
+                    Way currentWay = (Way) currentPrimaryElement;
+                    configureWaySettings(currentWay);
+                } else if (currentPrimaryElement.getClass() == Relation.class) {
+                    Relation currentRelation = (Relation) currentPrimaryElement;
+                    if (currentRelation.getTag("border_type") != null || currentRelation.getTag("boundary") != null) {
+                        for (RelationMember member : currentRelation.getMemberList()) {
+                            if (member.isWay()) {
+                                Way wayMember = map.findWayById(member.getRefId());
+                                if (wayMember != null) {
+                                    wayMember.setColor(Color.GREEN);
+                                }
+                            }
+                        }
+                    }
                 }
                 map.addElement(elementHandler.getCurrentPrimaryElement());
             }
@@ -173,22 +185,26 @@ public class OSMParser {
                     + localName + "," + qName);
         }
 
-        private void setWayColor(Way wayToAdd){
+        private void configureWaySettings(Way wayToAdd) {
             String highWayType = wayToAdd.getTag("highway");
-            if (wayToAdd.getTag("natural") != null){
+            if (wayToAdd.getTag("natural") != null) {
                 // Check if the way is a water feature
                 if (wayToAdd.getTag("natural").equals("water") || wayToAdd.getTag("natural").equals("coastline"))
                     wayToAdd.setColor(Way.WayColor.WATER.getColor());
                 if (wayToAdd.getTag("natural").equals("water"))
                     wayToAdd.setWater(true);
-        }
-            if (wayToAdd.getTag("building") != null && wayToAdd.getTag("building").equals("yes")){
+            }
+            if (wayToAdd.getTag("boundary") != null || wayToAdd.getTag("boundary_type") != null){
+                wayToAdd.setColor(Color.GREEN);
+                wayToAdd.setBoundary(true);
+            }
+            if (wayToAdd.getTag("building") != null && wayToAdd.getTag("building").equals("yes")) {
                 wayToAdd.setColor(Way.WayColor.BUILDING.getColor());
                 wayToAdd.setWayThickness(Way.Thickness.BUILDING.getThickness());
                 wayToAdd.setWayPriority(Way.Priority.BUILDING.getPriority());
             }
-            if (highWayType != null){
-                switch (highWayType){
+            if (highWayType != null) {
+                switch (highWayType) {
                     case ("motorway"):
                         wayToAdd.setColor(Way.WayColor.MOTORWAY.getColor());
                         wayToAdd.setWayThickness(Way.Thickness.MOTORWAY.getThickness());
@@ -275,7 +291,7 @@ public class OSMParser {
 
 
             //System.out.println("\t" + qName + "=" + value
-              //      + "[" + type + "]");
+            //      + "[" + type + "]");
 
         }
     }
