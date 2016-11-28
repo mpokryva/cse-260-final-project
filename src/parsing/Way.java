@@ -39,6 +39,17 @@ public class Way extends OSMElement {
      * NOT exhaustive. Made to help map look nicer.
      */
     private boolean isBoundary;
+
+    private boolean isPhysicalBoundary;
+
+    public boolean isPhysicalBoundary() {
+        return isPhysicalBoundary;
+    }
+
+    public void setPhysicalBoundary(boolean physicalBoundary) {
+        isPhysicalBoundary = physicalBoundary;
+    }
+
     /**
      * Initializes a way with the given ID.
      *

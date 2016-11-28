@@ -189,15 +189,20 @@ public class OSMParser {
             String highWayType = wayToAdd.getTag("highway");
             if (wayToAdd.getTag("natural") != null) {
                 // Check if the way is a water feature
-                if (wayToAdd.getTag("natural").equals("water") || wayToAdd.getTag("natural").equals("coastline"))
-                    wayToAdd.setColor(Way.WayColor.WATER.getColor());
                 if (wayToAdd.getTag("natural").equals("water"))
                     wayToAdd.setWater(true);
+                    wayToAdd.setColor(Way.WayColor.WATER.getColor());
             }
+            // Check if way is boundary and configure accordingly.
             if (wayToAdd.getTag("boundary") != null || wayToAdd.getTag("boundary_type") != null){
                 wayToAdd.setColor(Color.GREEN);
                 wayToAdd.setBoundary(true);
+                if (wayToAdd.getTag("boundary") != null && wayToAdd.getTag("natural") != null && wayToAdd.getTag("natural").equals("coastline"))
+                    wayToAdd.setPhysicalBoundary(true);
+                    wayToAdd.setBoundary(false);
+                    wayToAdd.setColor(Way.WayColor.DEFAULT.getColor());
             }
+            // Check if way is a building and configure accordingly.
             if (wayToAdd.getTag("building") != null && wayToAdd.getTag("building").equals("yes")) {
                 wayToAdd.setColor(Way.WayColor.BUILDING.getColor());
                 wayToAdd.setWayThickness(Way.Thickness.BUILDING.getThickness());

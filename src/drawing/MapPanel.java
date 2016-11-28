@@ -3,26 +3,16 @@ package drawing;
 
 import parsing.Map;
 import parsing.Node;
-import parsing.OSMParser;
 import parsing.Way;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.Point;
 import java.awt.event.*;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -63,13 +53,6 @@ public class MapPanel extends JPanel {
      */
     private static int MAXIMUM_ZOOM_IN = 40;
     /**
-     * Images of pin icons, like in Google Maps. Will implement in the future.
-     */
-    private static BufferedImage STARTING_PIN_ICON;
-    private static BufferedImage ENDING_PIN_ICON;
-    private JLabel startingPin;
-    private JLabel endingPin;
-    /**
      * The node marked as the starting location.
      */
     private Node startingNode;
@@ -77,6 +60,20 @@ public class MapPanel extends JPanel {
      * The node marked as the ending location.
      */
     private Node endingNode;
+    /**
+     * If true, boundaries are drawn.
+     * If false, they are hidden.
+     */
+    private boolean boundariesShowing;
+
+
+    /**
+     * Images of pin icons, like in Google Maps. Will implement in the future.
+     */
+    private static BufferedImage STARTING_PIN_ICON;
+    private static BufferedImage ENDING_PIN_ICON;
+    private JLabel startingPin;
+    private JLabel endingPin;
 
 
     /**
@@ -254,35 +251,36 @@ public class MapPanel extends JPanel {
         List<Way> wayList = map.getWayList();
         for (Way way : wayList) {
             int wayPriority = way.getWayPriority();
-            if (wayPriority == Way.Priority.BUILDING.getPriority()){
-                int i =3;
-            }
+            // Checks that map is zoomed in enough.
             if (wayPriority*1000 < zoom){
-                g.setColor(way.getColor());
-                List<Node> nodesInWay = map.findNodesInWay(way);
-                Node firstNode = nodesInWay.get(0);
-                double firstLat = convertLatToPixels(firstNode.getLat());
-                double firstLon = convertLonToPixels(firstNode.getLon(), firstNode.getLat());
-                Path2D.Double wayLine = new Path2D.Double();
-                wayLine.moveTo(firstLon, firstLat);
-                for (int i = 1; i < nodesInWay.size(); i++) {
-                    double lat = nodesInWay.get(i).getLat();
-                    double lon = nodesInWay.get(i).getLon();
-                    double pixelLat = convertLatToPixels(lat);
-                    double pixelLon = convertLonToPixels(lon, lat);
-                    wayLine.lineTo(pixelLon, pixelLat);
-                }
-                g2.setColor(way.getColor());
-                g2.setStroke(new BasicStroke(way.getWayThickness() + mouseWheelClicks / 10));
-                Node lastNode = nodesInWay.get(nodesInWay.size()-1);
+                // Checks if way is boundary, and if so, if it should be drawn.
+                if (!way.isBoundary() || boundariesShowing){
+                    g.setColor(way.getColor());
+                    List<Node> nodesInWay = map.findNodesInWay(way);
+                    Node firstNode = nodesInWay.get(0);
+                    double firstLat = convertLatToPixels(firstNode.getLat());
+                    double firstLon = convertLonToPixels(firstNode.getLon(), firstNode.getLat());
+                    Path2D.Double wayLine = new Path2D.Double();
+                    wayLine.moveTo(firstLon, firstLat);
+                    for (int i = 1; i < nodesInWay.size(); i++) {
+                        double lat = nodesInWay.get(i).getLat();
+                        double lon = nodesInWay.get(i).getLon();
+                        double pixelLat = convertLatToPixels(lat);
+                        double pixelLon = convertLonToPixels(lon, lat);
+                        wayLine.lineTo(pixelLon, pixelLat);
+                    }
+                    g2.setColor(way.getColor());
+                    g2.setStroke(new BasicStroke(way.getWayThickness() + mouseWheelClicks / 10));
+                    Node lastNode = nodesInWay.get(nodesInWay.size()-1);
                 /*
-                If the way is a loop, we fill it.
+                If the way is a water feature, we fill it.
                  */
-                if (way.isWater()){
-                   // wayLine.closePath();
-                    g2.fill(wayLine);
+                    if (way.isWater()){
+                        // wayLine.closePath();
+                        g2.fill(wayLine);
+                    }
+                    g2.draw(wayLine);
                 }
-                g2.draw(wayLine);
             }
         }
 
@@ -449,5 +447,20 @@ public class MapPanel extends JPanel {
         return endingNode;
     }
 
+    /**
+     * If set to true, map boundaries will be shown.
+     * If false, they wil be hidden.
+     * @param boundariesShowing Value specifying if boundaries should be shown.
+     */
+    public void setBoundariesShowing(boolean boundariesShowing) {
+        this.boundariesShowing = boundariesShowing;
+    }
 
+    /**
+     * Returns a vlaue specifying if boundaries are shown.
+     * @return True, if boundaries are shown. False otherwise.
+     */
+    public boolean isBoundariesShowing() {
+        return boundariesShowing;
+    }
 }
