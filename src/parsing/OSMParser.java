@@ -118,14 +118,14 @@ public class OSMParser {
          * Method called by SAX parser when start of document is encountered.
          */
         public void startDocument() {
-            System.out.println("startDocument");
+            //System.out.println("startDocument");
         }
 
         /**
          * Method called by SAX parser when end of document is encountered.
          */
         public void endDocument() {
-            System.out.println("endDocument");
+            //System.out.println("endDocument");
         }
 
         /**
@@ -135,8 +135,8 @@ public class OSMParser {
         public void startElement(String namespaceURI, String localName,
                                  String qName, Attributes atts) {
             attributes = atts;
-            System.out.println("startElement: " + namespaceURI + ","
-                    + localName + "," + qName);
+            //System.out.println("startElement: " + namespaceURI + ","
+                //    + localName + "," + qName);
 
             // Element is primary (node, way, or relation).
             if (qName.equals("node") || qName.equals("way") || qName.equals("relation")) {
@@ -182,8 +182,8 @@ public class OSMParser {
                 map.addElement(elementHandler.getCurrentPrimaryElement());
             }
 
-            System.out.println("endElement: " + namespaceURI + ","
-                    + localName + "," + qName);
+            //System.out.println("endElement: " + namespaceURI + ","
+               //     + localName + "," + qName);
         }
 
         private void configureWaySettings(Way wayToAdd) {
@@ -203,7 +203,7 @@ public class OSMParser {
             }
 
                 // Check if way is a building and configure accordingly.
-                if (wayToAdd.getTag("building") != null && wayToAdd.getTag("building").equals("yes")) {
+                if (wayToAdd.hasTagPair("building", "yes")) {
                     wayToAdd.setColor(Way.WayColor.BUILDING.getColor());
                     wayToAdd.setWayThickness(Way.Thickness.BUILDING.getThickness());
                     wayToAdd.setWayPriority(Way.Priority.BUILDING.getPriority());

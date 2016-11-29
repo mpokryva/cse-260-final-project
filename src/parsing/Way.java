@@ -40,15 +40,8 @@ public class Way extends OSMElement {
      */
     private boolean isBoundary;
 
-    private boolean isPhysicalBoundary;
+    private boolean isCoastline;
 
-    public boolean isPhysicalBoundary() {
-        return isPhysicalBoundary;
-    }
-
-    public void setPhysicalBoundary(boolean physicalBoundary) {
-        isPhysicalBoundary = physicalBoundary;
-    }
 
     /**
      * Initializes a way with the given ID.
@@ -206,7 +199,7 @@ public class Way extends OSMElement {
         TERTIARY(5),
         UNCLASSIFIED(6),
         RESIDENTIAL(15),
-        BUILDING(10),
+        BUILDING(30),
         DEFAULT(6);
 
         private int priority;
