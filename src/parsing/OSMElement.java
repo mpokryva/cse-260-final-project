@@ -79,12 +79,31 @@ public class OSMElement {
     }
 
     /**
+     * Checks if this element has the specified tag key & value pair.
+     * @param key The tag key.
+     * @param value The tag value.
+     * @return True, if this element has the specified tag key & value pair. False otherwise.
+     */
+    public boolean hasTagPair(String key, String value){
+        return (tagMap.get(key) != null && tagMap.get(key).equals(value));
+    }
+
+    /**
      * Returns the tag value matching the specified key.
      * @param tagKey The tag's key.
      * @return The tag's value.
      */
     public String getTag(String tagKey){
         return tagMap.get(tagKey);
+    }
+
+    /**
+     * Convenience method for checking if this element has a specified tag, given a tag key.
+     * @param key The tag key.
+     * @return True if this element has a tag with the specified key.
+     */
+    public boolean hasTag(String key){
+        return tagMap.get(key) != null;
     }
 
 
@@ -127,5 +146,6 @@ public class OSMElement {
         }
         return this.getId().equals(((OSMElement) other).getId());
     }
+
 
 }
