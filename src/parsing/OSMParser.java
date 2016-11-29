@@ -12,6 +12,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
+import sun.misc.ThreadGroupUtils;
 
 /**
  * Sample parser for reading Open Street parsing.Map XML format files.
@@ -192,10 +193,15 @@ public class OSMParser {
                 wayToAdd.setColor(Way.WayColor.WATER.getColor());
             }
 
-            // Check if way is boundary and configure accordingly.
+            // Check if way is a non-physical boundary and configure accordingly.
             if (wayToAdd.hasTag("boundary") && !(wayToAdd.hasTagPair("natural", "coastline"))) {
                 wayToAdd.setBoundary(true);
             }
+            if ((wayToAdd.hasTagPair("natural", "coastline"))) {
+               wayToAdd.setColor(new Color(0,0,128));
+
+            }
+
                 // Check if way is a building and configure accordingly.
                 if (wayToAdd.getTag("building") != null && wayToAdd.getTag("building").equals("yes")) {
                     wayToAdd.setColor(Way.WayColor.BUILDING.getColor());
