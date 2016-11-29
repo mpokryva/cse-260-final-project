@@ -187,76 +187,71 @@ public class OSMParser {
 
         private void configureWaySettings(Way wayToAdd) {
             String highWayType = wayToAdd.getTag("highway");
-            if (wayToAdd.getTag("natural") != null) {
-                // Check if the way is a water feature
-                if (wayToAdd.getTag("natural").equals("water"))
-                    wayToAdd.setWater(true);
-                    wayToAdd.setColor(Way.WayColor.WATER.getColor());
+            if (wayToAdd.hasTagPair("natural", "water")) {
+                wayToAdd.setWater(true);
+                wayToAdd.setColor(Way.WayColor.WATER.getColor());
             }
+
             // Check if way is boundary and configure accordingly.
-            if (wayToAdd.getTag("boundary") != null || wayToAdd.getTag("boundary_type") != null){
-                wayToAdd.setColor(Color.GREEN);
+            if (wayToAdd.hasTag("boundary") && !(wayToAdd.hasTagPair("natural", "coastline"))) {
                 wayToAdd.setBoundary(true);
-                if (wayToAdd.getTag("boundary") != null && wayToAdd.getTag("natural") != null && wayToAdd.getTag("natural").equals("coastline"))
-                    wayToAdd.setPhysicalBoundary(true);
-                    wayToAdd.setBoundary(false);
-                    wayToAdd.setColor(Way.WayColor.DEFAULT.getColor());
             }
-            // Check if way is a building and configure accordingly.
-            if (wayToAdd.getTag("building") != null && wayToAdd.getTag("building").equals("yes")) {
-                wayToAdd.setColor(Way.WayColor.BUILDING.getColor());
-                wayToAdd.setWayThickness(Way.Thickness.BUILDING.getThickness());
-                wayToAdd.setWayPriority(Way.Priority.BUILDING.getPriority());
-            }
-            if (highWayType != null) {
-                switch (highWayType) {
-                    case ("motorway"):
-                        wayToAdd.setColor(Way.WayColor.MOTORWAY.getColor());
-                        wayToAdd.setWayThickness(Way.Thickness.MOTORWAY.getThickness());
-                        wayToAdd.setWayPriority(Way.Priority.MOTORWAY.getPriority());
-                        break;
-                    case ("trunk"):
-                        wayToAdd.setColor(Way.WayColor.TRUNK.getColor());
-                        wayToAdd.setWayThickness(Way.Thickness.TRUNK.getThickness());
-                        wayToAdd.setWayPriority(Way.Priority.TRUNK.getPriority());
-                        break;
-                    case ("primary"):
-                        wayToAdd.setColor(Way.WayColor.PRIMARY.getColor());
-                        wayToAdd.setWayThickness(Way.Thickness.PRIMARY.getThickness());
-                        wayToAdd.setWayPriority(Way.Priority.PRIMARY.getPriority());
-                        break;
-                    case ("secondary"):
-                        wayToAdd.setColor(Way.WayColor.SECONDARY.getColor());
-                        wayToAdd.setWayThickness(Way.Thickness.SECONDARY.getThickness());
-                        wayToAdd.setWayPriority(Way.Priority.SECONDARY.getPriority());
-                        break;
-                    case ("tertiary"):
-                        wayToAdd.setColor(Way.WayColor.TERTIARY.getColor());
-                        wayToAdd.setWayThickness(Way.Thickness.TERTIARY.getThickness());
-                        wayToAdd.setWayPriority(Way.Priority.TERTIARY.getPriority());
-                        break;
-                    case ("unclassified"):
-                        wayToAdd.setColor(Way.WayColor.UNCLASSIFIED.getColor());
-                        wayToAdd.setWayThickness(Way.Thickness.UNCLASSIFIED.getThickness());
-                        wayToAdd.setWayPriority(Way.Priority.UNCLASSIFIED.getPriority());
-                        break;
-                    case ("residential"):
-                        wayToAdd.setColor(Way.WayColor.RESIDENTIAL.getColor());
-                        wayToAdd.setWayThickness(Way.Thickness.RESIDENTIAL.getThickness());
-                        wayToAdd.setWayPriority(Way.Priority.RESIDENTIAL.getPriority());
-                        break;
-                    default:
-                        wayToAdd.setColor(Way.WayColor.DEFAULT.getColor());
-                        wayToAdd.setWayThickness(Way.Thickness.DEFAULT.getThickness());
-                        wayToAdd.setWayPriority(Way.Priority.DEFAULT.getPriority());
+                // Check if way is a building and configure accordingly.
+                if (wayToAdd.getTag("building") != null && wayToAdd.getTag("building").equals("yes")) {
+                    wayToAdd.setColor(Way.WayColor.BUILDING.getColor());
+                    wayToAdd.setWayThickness(Way.Thickness.BUILDING.getThickness());
+                    wayToAdd.setWayPriority(Way.Priority.BUILDING.getPriority());
                 }
+                if (highWayType != null) {
+                    switch (highWayType) {
+                        case ("motorway"):
+                            wayToAdd.setColor(Way.WayColor.MOTORWAY.getColor());
+                            wayToAdd.setWayThickness(Way.Thickness.MOTORWAY.getThickness());
+                            wayToAdd.setWayPriority(Way.Priority.MOTORWAY.getPriority());
+                            break;
+                        case ("trunk"):
+                            wayToAdd.setColor(Way.WayColor.TRUNK.getColor());
+                            wayToAdd.setWayThickness(Way.Thickness.TRUNK.getThickness());
+                            wayToAdd.setWayPriority(Way.Priority.TRUNK.getPriority());
+                            break;
+                        case ("primary"):
+                            wayToAdd.setColor(Way.WayColor.PRIMARY.getColor());
+                            wayToAdd.setWayThickness(Way.Thickness.PRIMARY.getThickness());
+                            wayToAdd.setWayPriority(Way.Priority.PRIMARY.getPriority());
+                            break;
+                        case ("secondary"):
+                            wayToAdd.setColor(Way.WayColor.SECONDARY.getColor());
+                            wayToAdd.setWayThickness(Way.Thickness.SECONDARY.getThickness());
+                            wayToAdd.setWayPriority(Way.Priority.SECONDARY.getPriority());
+                            break;
+                        case ("tertiary"):
+                            wayToAdd.setColor(Way.WayColor.TERTIARY.getColor());
+                            wayToAdd.setWayThickness(Way.Thickness.TERTIARY.getThickness());
+                            wayToAdd.setWayPriority(Way.Priority.TERTIARY.getPriority());
+                            break;
+                        case ("unclassified"):
+                            wayToAdd.setColor(Way.WayColor.UNCLASSIFIED.getColor());
+                            wayToAdd.setWayThickness(Way.Thickness.UNCLASSIFIED.getThickness());
+                            wayToAdd.setWayPriority(Way.Priority.UNCLASSIFIED.getPriority());
+                            break;
+                        case ("residential"):
+                            wayToAdd.setColor(Way.WayColor.RESIDENTIAL.getColor());
+                            wayToAdd.setWayThickness(Way.Thickness.RESIDENTIAL.getThickness());
+                            wayToAdd.setWayPriority(Way.Priority.RESIDENTIAL.getPriority());
+                            break;
+                        default:
+                            wayToAdd.setColor(Way.WayColor.DEFAULT.getColor());
+                            wayToAdd.setWayThickness(Way.Thickness.DEFAULT.getThickness());
+                            wayToAdd.setWayPriority(Way.Priority.DEFAULT.getPriority());
+                    }
+                }
+
             }
 
-        }
+            /**
+             * Method called by SAX parser when character data is encountered.
+             */
 
-        /**
-         * Method called by SAX parser when character data is encountered.
-         */
         public void characters(char[] ch, int start, int length)
                 throws SAXParseException {
             // OSM files apparently do not have interesting CDATA.

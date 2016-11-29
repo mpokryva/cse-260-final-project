@@ -11,7 +11,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://F:/C/Users/Miki/Downloads/GPSDevice.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/GPSDevice.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
