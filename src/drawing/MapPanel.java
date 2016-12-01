@@ -85,9 +85,23 @@ public class MapPanel extends JPanel {
         this.map = map;
         addZoomListener();
         addPanListener();
-        double defaultZoom = 6000;
-        zoom = defaultZoom;
-        centerLon = map.getCenterLon() + RIGHT_SHIFT;
+        double defaultZoom;
+        double panelWidth = this.getWidth();
+        double panelHeight = this.getHeight();
+        double largerDimension;
+        if (panelHeight > panelWidth)
+            largerDimension = panelHeight;
+        else
+            largerDimension = panelWidth;
+        double lonRange = map.getLonRange();
+        double latRange = map.getLatRange();
+        double largerRange;
+        if (lonRange > latRange)
+            largerRange = lonRange;
+        else
+            largerRange = latRange;
+        zoom = largerDimension;
+        centerLon = map.getCenterLon();
         centerLat = map.getCenterLat();
         addRightMouseClickListener();
         addDoubleClickListener();
@@ -100,6 +114,23 @@ public class MapPanel extends JPanel {
         }
     }
 
+    public void recenter(){
+        double panelWidth = this.getWidth();
+        double panelHeight = this.getHeight();
+        double largerDimension;
+        if (panelHeight > panelWidth)
+            largerDimension = panelHeight;
+        else
+            largerDimension = panelWidth;
+        double lonRange = map.getLonRange();
+        double latRange = map.getLatRange();
+        double largerRange;
+        if (lonRange > latRange)
+            largerRange = lonRange;
+        else
+            largerRange = latRange;
+        zoom = largerDimension/largerRange;
+    }
 
     /**
      * Adds a listener for user mouse panning.
@@ -199,12 +230,13 @@ public class MapPanel extends JPanel {
             public void mouseWheelMoved(MouseWheelEvent e) {
                 double amountRotated = -1 * e.getPreciseWheelRotation();
                 // Makes sure user can't zoom infinitely in or out.
-                if ((mouseWheelClicks >= MAXIMUM_ZOOM_OUT || amountRotated > 0) &&
-                        (mouseWheelClicks <= MAXIMUM_ZOOM_IN || amountRotated < 0)) {
+                //if ((mouseWheelClicks >= MAXIMUM_ZOOM_OUT || amountRotated > 0) &&
+                   //     (mouseWheelClicks <= MAXIMUM_ZOOM_IN || amountRotated < 0)) {
                     double scaleFactor = 10;    //10 chosen arbitrarily.
                     double zoomScaleFactor = zoom / scaleFactor;
                     double amountToZoom = amountRotated * zoomScaleFactor;
                     zoom += amountToZoom;
+
                     mouseWheelClicks += amountRotated;
                     double[] currentCoords = getMouseLocationAsCoords(e);
 
@@ -219,7 +251,8 @@ public class MapPanel extends JPanel {
                     }
                     repaint();
                 }
-            }
+
+          //  }
         });
     }
 

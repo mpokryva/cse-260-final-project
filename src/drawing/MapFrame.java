@@ -78,6 +78,7 @@ public class MapFrame extends JFrame implements GPSListener {
         this.add(mapPanel, BorderLayout.CENTER);
         this.add(notificationPanel, BorderLayout.SOUTH);
         this.setVisible(true);
+        mapPanel.recenter();
         addMapPanelClickListener();
         addMenu();
     }
