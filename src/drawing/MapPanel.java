@@ -303,12 +303,7 @@ public class MapPanel extends JPanel {
                         wayLine.lineTo(pixelLon, pixelLat);
                     }
                     g2.setColor(way.getColor());
-                    if (way.hasTagPair("natural", "coastline")){
-                        Stroke dashed = new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
-                        g2.setStroke(dashed);
-                    }
-                    else
-                        g2.setStroke(new BasicStroke(way.getWayThickness() + mouseWheelClicks / 10));
+                    g2.setStroke(new BasicStroke(way.getWayThickness() + mouseWheelClicks / 10));
                     Node lastNode = nodesInWay.get(nodesInWay.size()-1);
                 /*
                 If the way is a water feature, we fill it.
