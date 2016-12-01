@@ -20,6 +20,15 @@ public class Map {
     private double maxLat;  // Maximum latitude of this map.
     private double minLon;  // Minimum longitude of this map.
     private double maxLon;  // Maximum longitude of this map.
+    /**
+     * Distance from minimum latitude to maximum latitude.
+     */
+    private double latRange;
+    /**
+     * Distance from minimum longitude to maximum longitude.
+     */
+    private double lonRange;
+
 
 
     /**
@@ -72,6 +81,9 @@ public class Map {
         } else {
             relationList.add((Relation) osmElement);
         }
+        // Set the lon and lat ranges after the minimum lon and lat have been calculated.
+        lonRange = maxLon - minLon;
+        latRange = maxLat - minLat;
     }
 
     /**
@@ -307,5 +319,19 @@ public class Map {
         this.maxLon = maxLon;
     }
 
+    /**
+     * Returns the distance from the maximum latitude to the minimum latitude.
+     * @return The distance from the maximum latitude to the minimum latitude.
+     */
+    public double getLatRange() {
+        return latRange;
+    }
 
+    /**
+     * Returns the distance from the maximum longitude to the minimum longitude.
+     * @return The distance from the maximum longitude to the minimum longitude.
+     */
+    public double getLonRange() {
+        return lonRange;
+    }
 }
