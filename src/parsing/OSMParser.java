@@ -196,9 +196,12 @@ public class OSMParser {
             // Check if way is a non-physical boundary and configure accordingly.
             if (wayToAdd.hasTag("boundary") && !(wayToAdd.hasTagPair("natural", "coastline"))) {
                 wayToAdd.setBoundary(true);
+                wayToAdd.setColor(Way.WayColor.BOUNDARY.getColor());
+                wayToAdd.setWayThickness(Way.Thickness.BOUNDARY.getThickness());
+                wayToAdd.setWayPriority(Way.Priority.BOUNDARY.getPriority());
             }
             if ((wayToAdd.hasTagPair("natural", "coastline"))) {
-               wayToAdd.setColor(new Color(0,0,128));
+               wayToAdd.setColor(Way.WayColor.COASTLINE.getColor());
 
             }
 

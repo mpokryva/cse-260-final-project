@@ -85,22 +85,6 @@ public class MapPanel extends JPanel {
         this.map = map;
         addZoomListener();
         addPanListener();
-        double defaultZoom;
-        double panelWidth = this.getWidth();
-        double panelHeight = this.getHeight();
-        double largerDimension;
-        if (panelHeight > panelWidth)
-            largerDimension = panelHeight;
-        else
-            largerDimension = panelWidth;
-        double lonRange = map.getLonRange();
-        double latRange = map.getLatRange();
-        double largerRange;
-        if (lonRange > latRange)
-            largerRange = lonRange;
-        else
-            largerRange = latRange;
-        zoom = largerDimension;
         centerLon = map.getCenterLon();
         centerLat = map.getCenterLat();
         addRightMouseClickListener();
@@ -114,6 +98,9 @@ public class MapPanel extends JPanel {
         }
     }
 
+    /**
+     * Called once as part of initialization, in order to properly center and zoom map.
+     */
     public void recenter(){
         double panelWidth = this.getWidth();
         double panelHeight = this.getHeight();

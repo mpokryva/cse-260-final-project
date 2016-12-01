@@ -40,7 +40,6 @@ public class Way extends OSMElement {
      */
     private boolean isBoundary;
 
-    private boolean isCoastline;
 
 
     /**
@@ -200,6 +199,7 @@ public class Way extends OSMElement {
         UNCLASSIFIED(6),
         RESIDENTIAL(15),
         BUILDING(30),
+        BOUNDARY(1),
         DEFAULT(6);
 
         private int priority;
@@ -223,6 +223,7 @@ public class Way extends OSMElement {
         UNCLASSIFIED(1),
         RESIDENTIAL(1),
         BUILDING(0.5f),
+        BOUNDARY(0.5f),
         DEFAULT(2);
 
         private float thickness;
@@ -246,6 +247,8 @@ public class Way extends OSMElement {
         UNCLASSIFIED(new Color(254, 254, 254)),
         RESIDENTIAL(new Color(254, 254, 254)),
         BUILDING(new Color(254, 254, 254)),
+        BOUNDARY(new Color(0,100,0)),
+        COASTLINE(new Color(0,0,128)),
         DEFAULT(new Color(254, 254, 254));
 
         Color color;
