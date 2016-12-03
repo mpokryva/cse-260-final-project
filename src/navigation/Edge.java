@@ -15,13 +15,19 @@ public class Edge {
     private Vertex second;
 
     /**
+     * The weight of this edge
+     */
+    private double weight;
+
+    /**
      * Initializes an edge given two vertices
      * @param first The first vertex.
      * @param second The second vertex.
      */
-    public Edge(Vertex first, Vertex second){
+    public Edge(Vertex first, Vertex second, double weight){
         this.first = first;
         this.second = second;
+        this.weight = weight;
     }
 
     /**
@@ -39,5 +45,13 @@ public class Edge {
      */
     public Vertex getSecond() {
         return second;
+    }
+
+    /**
+     * Returns the edge's weight.
+     * @return The edge's weight.
+     */
+    public double getWeight(){
+        return weight;
     }
 }

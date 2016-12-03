@@ -1,14 +1,19 @@
 package parsing;
 
+import navigation.Edge;
+import navigation.Graph;
+import navigation.Vertex;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * Created by mpokr on 10/13/2016.
  */
-public class Map {
+public class Map{
     List<Node> nodeList;     // List of nodes
     HashMap<String, Node> idToNodeMap;  // Map of id's of Nodes to Nodes.
     HashMap<String, Node> nameToNodeMap; // Map of names of Nodes to Nodes.
@@ -28,7 +33,6 @@ public class Map {
      * Distance from minimum longitude to maximum longitude.
      */
     private double lonRange;
-
 
 
     /**
@@ -78,6 +82,7 @@ public class Map {
             Way wayToAdd = (Way) osmElement;
             wayList.add(wayToAdd);
             nameToWayMap.put(wayToAdd.getName(), wayToAdd);
+            idToWayMap.put(wayToAdd.getId(), wayToAdd);
         } else {
             relationList.add((Relation) osmElement);
         }
@@ -85,6 +90,103 @@ public class Map {
         lonRange = maxLon - minLon;
         latRange = maxLat - minLat;
     }
+
+    /**
+     * Returns a weighted graph edge. Its weight corresponds to the specified way's length.
+     *
+     * @param way The way to be represented by the edge.
+     * @return The weighted edge representing the specified way. Returns null if a faulty way is supplied
+     * (a way with less than 2 nodes).
+     */
+    public Edge constructEdge(Way way, Node startingNode, Node endingNode) {
+        List<Node> nodesInWay = findNodeSubListInWay(way, startingNode, endingNode);
+        Iterator<Node> it = nodesInWay.iterator();
+        double weight = 0;
+        Node previous;
+        // check if way is non-faulty.
+        if (nodesInWay.size() > 1)
+            previous = it.next();
+        else
+            return null;
+        while (it.hasNext()) {
+            double radianConversionFactor = Math.PI / 180;
+            double lon1 = previous.getLon() * radianConversionFactor;
+            double lat1 = previous.getLat() * radianConversionFactor;
+            Node current = it.next();
+            double lon2 = current.getLon() * radianConversionFactor;
+            double lat2 = current.getLat() * radianConversionFactor;
+            previous = current;
+
+            /*
+            Haversine formula
+            a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
+            c = 2 ⋅ atan2( √a, √(1−a) )
+            d = R ⋅ c
+            where	φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km);
+             */
+            double a0 = (Math.sin((lat2 - lat1) / 2) * Math.sin((lat2 - lat1)) / 2);
+            double a1 = Math.cos(lat1) * Math.cos(lat2);
+            double a2 = (Math.sin((lon2 - lon1) / 2) * Math.sin((lon2 - lon1)) / 2);
+            double a = a0 + a1 * a2;
+            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            double earthRadius = 6.371e6;
+            double distance = earthRadius * c;
+            weight += distance;
+        }
+        Vertex startingVertex = new Vertex(startingNode.getId());
+        Vertex endingVertex = new Vertex (endingNode.getId());
+        return new Edge(startingVertex, endingVertex, weight);
+    }
+
+    //@Override
+    /*
+    public Vertex constructVertex(Node node) {
+        List<Way> wayList = this.findWaysByNode(node);
+        List<Edge> edgeList = new ArrayList<>();
+        for (Way way : wayList){
+            constructEdge(way);
+        }
+        Vertex returnVertex = new Vertex(node.getId());
+        returnVertex.addEdgeList(edgeList);
+        return  returnVertex;
+    }
+    */
+
+    /*
+    public List<Edge> constructListEdges(Way way){
+        List<Node> nodesInWay = this.findNodesInWay(way);
+        List<Edge> edgeList = new ArrayList<>();
+        for (Node node : nodesInWay){
+            List<Way> waysWithNode = findWaysByNode(node);
+            // Check if there a more ways than the input way with the current node.
+            if (waysWithNode.size() > 1){
+                Vertex startingVertex = new Vertex(node.getId());
+                for (Way wayWithNode : waysWithNode){
+                    wayWithNode
+                }
+            }
+        }
+    }
+    */
+
+    public List<Edge> createGraph(Map map){
+        List<Edge> edgeList = new ArrayList<>();
+        for (Way way : wayList){
+            List<Node> nodesInWay = this.findNodesInWay(way);
+            Node firstNode = nodesInWay.get(0);
+            Node lastNode = nodesInWay.get(nodesInWay.size()-1);
+            for (int i=1; i <nodesInWay.size(); i++){
+                List<Way> wayWithNode = findWaysByNode(nodesInWay.get(i));
+                if (wayWithNode.size() > 1){
+                    Edge edge = constructEdge(way, firstNode, nodesInWay.get(i));
+                    edgeList.add(edge);
+                    firstNode = nodesInWay.get(i);
+                }
+            }
+        }
+        return edgeList;
+    }
+
 
     /**
      * Finds and returns a node according to its ID.
@@ -154,6 +256,43 @@ public class Map {
         return nodesInWay;
     }
 
+    /**
+     * Returns a sub list of nodes in way, from a specified to node to another.
+     * @param way The way to find the nodes of.
+     * @param firstNode The beginning node of the sub list.
+     * @param lastNode The ending node of the sub list.
+     * @return The sublist of nodes in the way.
+     */
+    public List<Node> findNodeSubListInWay(Way way, Node firstNode, Node lastNode){
+        String firstRef = firstNode.getId();
+        String lastRef = lastNode.getId();
+        int firstIndex = 0;
+        int lastIndex = 0;
+        List<Node> nodesInWay = new ArrayList<>();
+        List<String> nodeRefList = way.getNodeRefList();
+        for (int i=0; i < nodeRefList.size(); i++) {
+            Node foundNode = findNodeById(nodeRefList.get(i));
+            // Checks if node exists (node ref is not bogus).
+            if (foundNode != null) {
+                nodesInWay.add(foundNode);
+                if (lastIndex !=0 && firstIndex != 0)
+                    return nodesInWay.subList(firstIndex, lastIndex+1);
+
+                if (foundNode.getId().equals(firstRef)){
+                    firstIndex = i;
+                }
+                else if (foundNode.getId().equals(lastRef)){
+                    lastIndex = i;
+                }
+
+            }
+
+        }
+        return nodesInWay.subList(firstIndex, lastIndex+1);
+
+
+    }
+
 
     /**
      * Returns an array of way names.
@@ -182,13 +321,14 @@ public class Map {
 
     /**
      * Returns a list of ways that contains the specified node.
+     *
      * @param node The node to look for.
      * @return A list of nodes containing the specified node.
      */
-    public List<Way> findWaysByNode(Node node){
+    public List<Way> findWaysByNode(Node node) {
         ArrayList<Way> waysContainingNode = new ArrayList<>();
-        for (Way way : wayList){
-            if (way.hasNode(node)){
+        for (Way way : wayList) {
+            if (way.hasNode(node)) {
                 waysContainingNode.add(way);
             }
         }
@@ -321,6 +461,7 @@ public class Map {
 
     /**
      * Returns the distance from the maximum latitude to the minimum latitude.
+     *
      * @return The distance from the maximum latitude to the minimum latitude.
      */
     public double getLatRange() {
@@ -329,6 +470,7 @@ public class Map {
 
     /**
      * Returns the distance from the maximum longitude to the minimum longitude.
+     *
      * @return The distance from the maximum longitude to the minimum longitude.
      */
     public double getLonRange() {

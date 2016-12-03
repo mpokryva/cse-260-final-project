@@ -166,7 +166,8 @@ public class OSMParser {
                 if (currentPrimaryElement.getClass() == Way.class) {
                     Way currentWay = (Way) currentPrimaryElement;
                     configureWaySettings(currentWay);
-                } else if (currentPrimaryElement.getClass() == Relation.class) {
+
+                } /*else if (currentPrimaryElement.getClass() == Relation.class) {
                     Relation currentRelation = (Relation) currentPrimaryElement;
                     if (currentRelation.getTag("border_type") != null || currentRelation.getTag("boundary") != null) {
                         for (RelationMember member : currentRelation.getMemberList()) {
@@ -178,7 +179,7 @@ public class OSMParser {
                             }
                         }
                     }
-                }
+                } */
                 map.addElement(elementHandler.getCurrentPrimaryElement());
             }
 
