@@ -45,28 +45,93 @@ public class DirectionsGenerator {
         Vertex startingVertex = idToVertexMap.get(startingNode.getId());
         Vertex endingVertex = idToVertexMap.get(endingNode.getId());
 
-        HashMap<String, Double> shortestPathSet = new HashMap<>();
-        // Set distances to infinity, except for initial vertex.
+        LinkedHashMap<String, Double> shortestPathMap = new LinkedHashMap<>();
+        HashSet<Vertex> visitedSet = new HashSet<>();
+        HashSet<Vertex> unvisitedSet = new HashSet<>();
         Set<String> vertexIdSet = idToVertexMap.keySet();
+        // Stores the id of the vertex and its distance to the initial vertex.
+        HashMap<String, Double> idToDistanceMap = new HashMap<>();
+        // Set distances to infinity, except for initial vertex.
         for (String id : vertexIdSet){
-            shortestPathSet.put(id, -1d);
-            if (id.equals(startingVertex.getId())){
-                shortestPathSet.put(id, 0d);
-            }
+            idToDistanceMap.put(id, Double.POSITIVE_INFINITY); // filling up distance hashMap.
+            unvisitedSet.add(idToVertexMap.get(id)); // filling up unvisited set.
         }
-        HashSet<Vertex> visitedVertexSet = new HashSet<>();
-        visitedVertexSet.add(startingVertex);
-        HashSet<Vertex> unvisitedVertexSet = new HashSet<>();
+        idToDistanceMap.put(startingVertex.getId(), 0d); // setting distance for initial vertex.
+        visitedSet.add(startingVertex); // adding initial vertex to visited set.
+        unvisitedSet.remove(startingVertex); // remove initial vertex from unvisited set.
 
-
-        //HashMap<String, Boolean> shortestPathSet = new HashMap<>();
-        while (!visitedVertexSet.contains(endingVertex)){
-            Vertex currentVertex;
-            for (Edge adjacentEdge : currentVertex.getAdjacentEdges()){
-
-            }
+        Vertex currentVertex = startingVertex;
+        // Unvisited vertex with smallest tentative distance.
+        Vertex minDistUnvisitedVertex = getMinDistanceVertex(unvisitedSet, idToDistanceMap);
+             /*
+        The algorithm.
+         */
+        while (!visitedSet.contains(endingVertex)){
+            Vertex minDistanceNeighbor = updateDistances(currentVertex, visitedSet, unvisitedSet, idToDistanceMap);
+            visitedSet.add(currentVertex);
+            unvisitedSet.remove(currentVertex);
+            if (idToDistanceMap.get(minDistanceNeighbor.getId()) < idToDistanceMap.get(minDistUnvisitedVertex.getId()))
+                minDistUnvisitedVertex = minDistanceNeighbor;
+            currentVertex = minDistUnvisitedVertex;
+            shortestPathMap.put(currentVertex.getId(), idToDistanceMap.get(currentVertex.getId()));
         }
+
         return new ArrayList<Way>();
+    }
+
+    /**
+     * Updates the minimum distances of the unvisited neighbors of the specified vertex, and returns
+     * the vertex with the minimum distance among them.
+     * @param currentVertex The specified vertex.
+     * @param visitedSet The set of visited vertices.
+     * @param unvisitedSet The set of unvisited vertices.
+     * @param idToDistanceMap A hash map of vertex id's to their tentative distances.
+     * @return The unvisited, neighboring node with the smallest tentative distance.
+     */
+    private Vertex updateDistances(Vertex currentVertex, HashSet<Vertex> visitedSet,
+                                   HashSet<Vertex> unvisitedSet, HashMap<String, Double> idToDistanceMap){
+        Vertex minDistanceVertex = null; // The neighboring unvisited vertex with the smallest tentative distance.
+        double minTentativeDistance = Double.POSITIVE_INFINITY; // the tentative distance of minDistanceVertex.
+        for (Edge adjacentEdge : currentVertex.getAdjacentEdges()){
+            Vertex complementVertex = adjacentEdge.getComplementVertex(currentVertex);
+            if (unvisitedSet.contains(complementVertex)){
+                double tentativeDistance = idToDistanceMap.get(complementVertex.getId());
+                double distanceToCurrent = idToDistanceMap.get(currentVertex.getId());
+                double distanceToNeighbor = adjacentEdge.getWeight();
+                double totalDistance = distanceToCurrent + distanceToNeighbor;
+                if (totalDistance < tentativeDistance){
+                    idToDistanceMap.put(complementVertex.getId(), totalDistance);
+                    if (totalDistance < minTentativeDistance)
+                        minTentativeDistance = totalDistance;
+                        minDistanceVertex = complementVertex;
+                }
+                else {
+                    if (tentativeDistance < minTentativeDistance)
+                        minTentativeDistance = tentativeDistance;
+                        minDistanceVertex = complementVertex;
+                }
+            }
+        }
+        return minDistanceVertex;
+    }
+
+    /**
+     * Returns the vertex with the minimum distance from the specified set.
+     * @param vertexSet The specified set of vertices.
+     * @param idToDistanceMap A hashmap of vertex id's to their distances.
+     * @return The vertex in vertexSet with the smallest distance.
+     */
+    private Vertex getMinDistanceVertex(HashSet<Vertex> vertexSet, HashMap<String, Double> idToDistanceMap){
+        Vertex minDistanceVertex = null;
+        double minDistance = Double.POSITIVE_INFINITY;
+        for (Vertex vertex : vertexSet){
+            double currentVertexDistance = idToDistanceMap.get(vertex.getId());
+            if (currentVertexDistance < minDistance){
+                minDistanceVertex = vertex;
+                minDistance = currentVertexDistance;
+            }
+        }
+        return minDistanceVertex;
     }
 
 
