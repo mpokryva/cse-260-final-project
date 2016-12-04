@@ -28,7 +28,7 @@ public class Vertex {
      * Adds an edge to this vertex's list of adjacent edges.
      * @param edge The edge to add.
      */
-    public void addEdge(Edge edge){
+    public void addAdjacentEdge(Edge edge){
         adjacentEdges.add(edge);
     }
 
@@ -36,7 +36,7 @@ public class Vertex {
      * Convenience method to add an edge list to this vertex's list of adjacent edges.
      * @param edgeList The list of edges to add.
      */
-    public void addEdgeList(List<Edge> edgeList){
+    public void addAdjacentEdgeList(List<Edge> edgeList){
         adjacentEdges.addAll(edgeList);
     }
 
@@ -81,6 +81,20 @@ public class Vertex {
             return false;
         }
         return this.getId().equals(((Vertex) other).getId());
+    }
+
+    /**
+     * Returns an edge that is connected to this vertex and the specified vertex, if it exists.
+     * @param other The specified vertex.
+     * @return The edge that is connected to this vertex and the specified vertex, if it exists. Returns null if it doesn't.
+     */
+    public Edge getEdgeConnectedToOther(Vertex other){
+        for (Edge adjacentEdge : adjacentEdges){
+            if (adjacentEdge.getComplementVertex(this).equals(other)){
+                return adjacentEdge;
+            }
+        }
+        return null;
     }
     
     

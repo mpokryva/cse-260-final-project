@@ -6,9 +6,9 @@ package navigation;
 public class Edge {
 
     /**
-     * The id to of the way this edge represents.
+     * The wayId to of the way this edge represents.
      */
-    private String id;
+    private String wayId;
     /**
      * The first vertex of this edge.
      */
@@ -29,7 +29,7 @@ public class Edge {
      * @param second The second vertex.
      */
     public Edge(String id, Vertex first, Vertex second, double weight){
-        this.id = id;
+        this.wayId = id;
         this.first = first;
         this.second = second;
         this.weight = weight;
@@ -78,11 +78,11 @@ public class Edge {
     }
 
     /**
-     * Return's the id of the way this edge represents.
-     * @return The id of the way this edge represents.
+     * Return's the wayId of the way this edge represents.
+     * @return The wayId of the way this edge represents.
      */
-    public String getId() {
-        return id;
+    public String getWayId() {
+        return wayId;
     }
 
     /**
@@ -92,14 +92,14 @@ public class Edge {
      */
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return wayId.hashCode();
     }
 
     /**
-     * Only equal if the two edge's id's are equal.
+     * Only equal if the two edge's wayId's are equal.
      *
      * @param other The edge to compare to.
-     * @return True if the two edge's id's are equal.
+     * @return True if the two edge's wayId's are equal.
      */
     @Override
     public boolean equals(Object other) {
@@ -109,6 +109,14 @@ public class Edge {
         if (!(other instanceof Edge)) {
             return false;
         }
-        return this.getId().equals(((Edge) other).getId());
+        return this.getWayId().equals(((Edge) other).getWayId());
+    }
+
+    public void setFirst(Vertex first) {
+        this.first = first;
+    }
+
+    public void setSecond(Vertex second) {
+        this.second = second;
     }
 }

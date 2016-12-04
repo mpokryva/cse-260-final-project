@@ -5,12 +5,7 @@ import navigation.Graph;
 import navigation.Vertex;
 import navigation.VertexEdgeCollection;
 
-import java.awt.*;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by mpokr on 10/13/2016.
@@ -102,8 +97,11 @@ public class Map implements Graph {
      * (a way with less than 2 nodes).
      */
     @Override
-    public Edge constructEdge(Way way, Node startingNode, Node endingNode) {
-        List<Node> nodesInWay = findNodeSubListInWay(way, startingNode, endingNode);
+    public Edge constructEdge(Way way, Node startingNode, Node endingNode, HashMap<String, Vertex> idToVertexMap) {
+        //List<Node> nodesInWay = findNodeSubListInWay(way, startingNode, endingNode);
+        List<Node> nodesInWay = new ArrayList<>();
+        nodesInWay.add(startingNode);
+        nodesInWay.add(endingNode);
         Iterator<Node> it = nodesInWay.iterator();
         double weight = 0;
         Node previous;
@@ -113,14 +111,24 @@ public class Map implements Graph {
         else
             return null;
         while (it.hasNext()) {
-            double radianConversionFactor = Math.PI / 180;
-            double lon1 = previous.getLon() * radianConversionFactor;
-            double lat1 = previous.getLat() * radianConversionFactor;
             Node current = it.next();
-            double lon2 = current.getLon() * radianConversionFactor;
-            double lat2 = current.getLat() * radianConversionFactor;
+            weight += getDistanceBetweenNodes(previous, current);
             previous = current;
+        }
+        Vertex startingVertex = new Vertex(startingNode.getId());
+        Vertex endingVertex = new Vertex(endingNode.getId());
+        if (idToVertexMap.containsKey(startingVertex.getId())){
+            idToVertexMap.get(startingVertex.getId())
+        }
+        return new Edge(way.getId(), startingVertex, endingVertex, weight);
+    }
 
+    private double getDistanceBetweenNodes(Node startNode, Node endNode){
+        double radianConversionFactor = Math.PI / 180;
+        double lon1 = startNode.getLon() * radianConversionFactor;
+        double lat1 = startNode.getLat() * radianConversionFactor;
+        double lon2 = endNode.getLon() * radianConversionFactor;
+        double lat2 = endNode.getLat() * radianConversionFactor;
             /*
             Haversine formula
             a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
@@ -128,18 +136,13 @@ public class Map implements Graph {
             d = R ⋅ c
             where	φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km);
              */
-            double a0 = (Math.sin((lat2 - lat1) / 2) * Math.sin((lat2 - lat1)) / 2);
-            double a1 = Math.cos(lat1) * Math.cos(lat2);
-            double a2 = (Math.sin((lon2 - lon1) / 2) * Math.sin((lon2 - lon1)) / 2);
-            double a = a0 + a1 * a2;
-            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            double earthRadius = 6.371e6;
-            double distance = earthRadius * c;
-            weight += distance;
-        }
-        Vertex startingVertex = new Vertex(startingNode.getId());
-        Vertex endingVertex = new Vertex(endingNode.getId());
-        return new Edge(way.getId(), startingVertex, endingVertex, weight);
+        double a0 = (Math.sin((lat2 - lat1) / 2) * Math.sin((lat2 - lat1)) / 2);
+        double a1 = Math.cos(lat1) * Math.cos(lat2);
+        double a2 = (Math.sin((lon2 - lon1) / 2) * Math.sin((lon2 - lon1)) / 2);
+        double a = a0 + a1 * a2;
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double earthRadius = 6.371e6;
+        return earthRadius * c;
     }
 
 
@@ -150,35 +153,89 @@ public class Map implements Graph {
      */
     @Override
     public void createGraph() {
-        HashMap<String, Edge> idToEdgeMap = new HashMap<>();
+        HashMap<String, Vertex> idVertexMap = new HashMap<>();
+        List<Edge> edgeList = new ArrayList<>();
         for (Way way : wayList) {
-            List<Node> nodesInWay = this.findNodesInWay(way);
-            Node firstNode = nodesInWay.get(0);
-            Node lastNode = nodesInWay.get(nodesInWay.size() - 1);
-            for (int i = 1; i < nodesInWay.size(); i++) {
-                Node testNode = nodesInWay.get(i);
-                List<Way> wayWithNode = findWaysByNode(testNode);
-                if (wayWithNode.size() > 1 && !testNode.equals(firstNode) && !testNode.equals(lastNode)) {
-                    Edge edge = constructEdge(way, firstNode, nodesInWay.get(i));
-                    idToEdgeMap.put(edge.getId(), edge);
-                    firstNode = nodesInWay.get(i);
-                }
+            if (way.getId().equals("20240595")){
+                int i =3;
             }
+            List<Node> nodesInWay = this.findNodesInWay(way);
+            Iterator<Node> it = nodesInWay.iterator();
+            Node first = null;
+            if (nodesInWay.size() > 1){
+                first = it.next();
+            }
+            while (it.hasNext()){
+                Node second = it.next();
+                Edge edge = constructEdge(way, first, second);
+                edgeList.add(edge);
+                first = second;
+            }
+            /*
+            //if (way.hasTag("highway")){
+                List<Node> nodesInWay = this.findNodesInWay(way);
+
+                Node firstNode = nodesInWay.get(0);
+                Node lastNode = nodesInWay.get(nodesInWay.size() - 1);
+                int nodesWithMultipleWays = 0;
+                for (int i = 1; i < nodesInWay.size()-1; i++) {
+                    Node testNode = nodesInWay.get(i);
+                    List<Way> wayWithNode = findWaysByNode(testNode);
+                    if (wayWithNode.size() > 1) {
+                        nodesWithMultipleWays++;
+                        Edge edge = constructEdge(way, firstNode, testNode);
+                        idToEdgeMap.put(edge.getWayId(), edge);
+                        firstNode = testNode;
+                    }
+                }
+                if (nodesWithMultipleWays == 0){
+                    Edge edge = constructEdge(way, firstNode, lastNode);
+                    idToEdgeMap.put(edge.getWayId(), edge);
+                }
+            //}
+            */
         }
         HashMap<String, Vertex> idToVertexMap = new HashMap<>();
-        for (Edge edge : idToEdgeMap.values()) {
+        for (Edge edge : edgeList) {
             Vertex firstVertex = edge.getFirst();
             Vertex secondVertex = edge.getSecond();
-            firstVertex.addEdge(edge);
-            secondVertex.addEdge(edge);
-            if (!idToVertexMap.containsKey(firstVertex.getId())) {
+            if (firstVertex.getId().equals("213726335") || secondVertex.getId().equals("213726335")){
+                int i =3;
+            }
+            // Check if vertex map already contains vertex. If so, update it, and update the edge.
+            if (idToVertexMap.containsKey(firstVertex.getId())){
+                Vertex firstInMap = idToVertexMap.get(firstVertex.getId());
+                firstInMap.addAdjacentEdge(edge);
+                idToVertexMap.put(firstInMap.getId(), firstInMap);
+                edge.setFirst(firstInMap);
+            }
+            else {
                 idToVertexMap.put(firstVertex.getId(), firstVertex);
             }
-            if (!idToVertexMap.containsKey(secondVertex.getId())) {
+            if (idToVertexMap.containsKey(secondVertex.getId())){
+                Vertex secondInMap = idToVertexMap.get(secondVertex.getId());
+                secondInMap.addAdjacentEdge(edge);
+                idToVertexMap.put(secondInMap.getId(), secondInMap);
+                edge.setSecond(secondInMap);
+            }
+            else {
                 idToVertexMap.put(secondVertex.getId(), secondVertex);
             }
+
+
         }
-        graph = new VertexEdgeCollection(idToVertexMap, idToEdgeMap);
+        graph = new VertexEdgeCollection(idToVertexMap, edgeList);
+        //int lone = countLoneNodes(nodeList);
+        int i =3;
+    }
+
+    private int countLoneNodes(List<Node> nodes){
+        int loneNodes = 0;
+        for (Node node : nodes){
+            if (findWaysByNode(node).size() == 0)
+                loneNodes++;
+        }
+        return loneNodes;
     }
 
 
@@ -265,6 +322,10 @@ public class Map implements Graph {
         Integer lastIndex = null;
         List<Node> nodesInWay = new ArrayList<>();
         List<String> nodeRefList = way.getNodeRefList();
+        // Check if firstNode and lastNode are actually the first and last nodes of the specified way.
+        if (firstNode.equals(findNodeById(nodeRefList.get(0))) && lastNode.equals(findNodeById(nodeRefList.get(nodeRefList.size()-1)))){
+            return findNodesInWay(way);
+        }
         for (int i = 0; i < nodeRefList.size(); i++) {
             Node foundNode = findNodeById(nodeRefList.get(i));
             // Checks if node exists (node ref is not bogus).
@@ -282,7 +343,7 @@ public class Map implements Graph {
             }
 
         }
-        return nodesInWay.subList(firstIndex, lastIndex + 1);
+        return nodesInWay.subList(firstIndex, lastIndex);
 
 
     }
@@ -327,6 +388,26 @@ public class Map implements Graph {
             }
         }
         return waysContainingNode;
+    }
+
+    /**
+     * Returns the node nearest to the specified node.
+     * @param node The specified node.
+     * @return The node nearest to the specified node.
+     */
+    public Node findNearestNode(Node node){
+        double minDistance = Double.POSITIVE_INFINITY;
+        Node nearestNode = null;
+        for (Node nodeToCompare : nodeList){
+            if (!nodeToCompare.equals(node)){
+                double distanceBetween = getDistanceBetweenNodes(node, nodeToCompare);
+                if (distanceBetween < minDistance){
+                    minDistance = distanceBetween;
+                    nearestNode = nodeToCompare;
+                }
+            }
+        }
+        return nearestNode;
     }
 
     /**

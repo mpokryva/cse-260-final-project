@@ -21,8 +21,8 @@ public class Test {
         Map map = parser.getMap();
         Way way =  map.findWayById("118714341");
         System.out.println(way.getName());
-        List<Edge> edgeList = map.createGraph(map);
-        System.out.println(edgeList.get(0));
+        map.createGraph();
+        //System.out.println(edgeList.get(0));
 
 
     }

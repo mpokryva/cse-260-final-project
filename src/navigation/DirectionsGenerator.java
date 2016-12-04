@@ -2,8 +2,10 @@ package navigation;
 
 import parsing.Map;
 import parsing.Node;
+import parsing.OSMParser;
 import parsing.Way;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -28,7 +30,8 @@ public class DirectionsGenerator {
      * Initializes a DirectionsGenerator based on the specified Map.
      */
     public DirectionsGenerator(Map map){
-        map.createGraph();
+        this.map = map;
+        this.map.createGraph();
     }
 
     /**
@@ -38,19 +41,24 @@ public class DirectionsGenerator {
      * @param endingNode The ending point.
      * @return A list of ways representing a path from the starting to ending point.
      */
-    public List<Way> generatePath(Node startingNode, Node endingNode){
+    public List<Way> findShortestPath(Node startingNode, Node endingNode){
         VertexEdgeCollection vertexEdgeCollection = map.getGraph();
-        HashMap<String, Edge> idToEdgeMap = vertexEdgeCollection.getIdToEdgeMap();
+        List<Edge> edgeList = vertexEdgeCollection.getEdgeList();
         HashMap<String, Vertex> idToVertexMap = vertexEdgeCollection.getIdToVertexMap();
         Vertex startingVertex = idToVertexMap.get(startingNode.getId());
         Vertex endingVertex = idToVertexMap.get(endingNode.getId());
+        if (startingVertex == null || endingVertex == null){
+            throw new IllegalArgumentException("Non-driveable nodes selected");
+        }
 
-        LinkedHashMap<String, Double> shortestPathMap = new LinkedHashMap<>();
+       // LinkedHashMap<String, Double> shortestPathMap = new LinkedHashMap<>();
         HashSet<Vertex> visitedSet = new HashSet<>();
         HashSet<Vertex> unvisitedSet = new HashSet<>();
         Set<String> vertexIdSet = idToVertexMap.keySet();
         // Stores the id of the vertex and its distance to the initial vertex.
         HashMap<String, Double> idToDistanceMap = new HashMap<>();
+        HashMap<String, HashMap<String, Double>> shortestPathMap = new HashMap<>();
+
         // Set distances to infinity, except for initial vertex.
         for (String id : vertexIdSet){
             idToDistanceMap.put(id, Double.POSITIVE_INFINITY); // filling up distance hashMap.
@@ -63,20 +71,40 @@ public class DirectionsGenerator {
         Vertex currentVertex = startingVertex;
         // Unvisited vertex with smallest tentative distance.
         Vertex minDistUnvisitedVertex = getMinDistanceVertex(unvisitedSet, idToDistanceMap);
+        HashMap<String, String> idToPrevIdMap = new HashMap<>();
+        idToPrevIdMap.put(startingVertex.getId(), null);
+        Vertex lastAddedToShortestPath = startingVertex;
+        //
+        Vertex test = idToVertexMap.get("213726335");
+        int i =3;
              /*
         The algorithm.
          */
         while (!visitedSet.contains(endingVertex)){
-            Vertex minDistanceNeighbor = updateDistances(currentVertex, visitedSet, unvisitedSet, idToDistanceMap);
+            if (currentVertex.getId().equals("213726335")){
+                int j =3;
+            }
+            Vertex minDistanceNeighbor = updateDistances(currentVertex, visitedSet, unvisitedSet, idToDistanceMap, idToPrevIdMap);
             visitedSet.add(currentVertex);
             unvisitedSet.remove(currentVertex);
-            if (idToDistanceMap.get(minDistanceNeighbor.getId()) < idToDistanceMap.get(minDistUnvisitedVertex.getId()))
+            if (idToDistanceMap.get(minDistanceNeighbor.getId()) <= idToDistanceMap.get(minDistUnvisitedVertex.getId()))
                 minDistUnvisitedVertex = minDistanceNeighbor;
             currentVertex = minDistUnvisitedVertex;
-            shortestPathMap.put(currentVertex.getId(), idToDistanceMap.get(currentVertex.getId()));
+            lastAddedToShortestPath = currentVertex;
         }
-
-        return new ArrayList<Way>();
+        // Reconstruct path.
+        String key = lastAddedToShortestPath.getId();
+        ArrayList<Way> shortestPath = new ArrayList<Way>();
+        while (key != null){
+            String prevKey = idToPrevIdMap.get(key);
+            Vertex currVertex = idToVertexMap.get(key);
+            Vertex prevVertex = idToVertexMap.get(prevKey);
+            Edge connectingEdge = currVertex.getEdgeConnectedToOther(prevVertex);
+            String wayId = connectingEdge.getWayId();
+            Way wayInShortestPath = map.findWayById(wayId);
+            shortestPath.add(wayInShortestPath);
+        }
+        return shortestPath;
     }
 
     /**
@@ -86,10 +114,12 @@ public class DirectionsGenerator {
      * @param visitedSet The set of visited vertices.
      * @param unvisitedSet The set of unvisited vertices.
      * @param idToDistanceMap A hash map of vertex id's to their tentative distances.
+     * @param idToPrevIdMap A hash map of vertex id's to the previous vertex id in the shortest path set.
      * @return The unvisited, neighboring node with the smallest tentative distance.
      */
     private Vertex updateDistances(Vertex currentVertex, HashSet<Vertex> visitedSet,
-                                   HashSet<Vertex> unvisitedSet, HashMap<String, Double> idToDistanceMap){
+                                   HashSet<Vertex> unvisitedSet, HashMap<String, Double> idToDistanceMap,
+                                   HashMap<String, String> idToPrevIdMap){
         Vertex minDistanceVertex = null; // The neighboring unvisited vertex with the smallest tentative distance.
         double minTentativeDistance = Double.POSITIVE_INFINITY; // the tentative distance of minDistanceVertex.
         for (Edge adjacentEdge : currentVertex.getAdjacentEdges()){
@@ -99,14 +129,16 @@ public class DirectionsGenerator {
                 double distanceToCurrent = idToDistanceMap.get(currentVertex.getId());
                 double distanceToNeighbor = adjacentEdge.getWeight();
                 double totalDistance = distanceToCurrent + distanceToNeighbor;
-                if (totalDistance < tentativeDistance){
+                if (totalDistance <= tentativeDistance){
                     idToDistanceMap.put(complementVertex.getId(), totalDistance);
-                    if (totalDistance < minTentativeDistance)
+                    idToPrevIdMap.put(complementVertex.getId(), currentVertex.getId());
+                    if (totalDistance <= minTentativeDistance)
                         minTentativeDistance = totalDistance;
                         minDistanceVertex = complementVertex;
+
                 }
                 else {
-                    if (tentativeDistance < minTentativeDistance)
+                    if (tentativeDistance <= minTentativeDistance)
                         minTentativeDistance = tentativeDistance;
                         minDistanceVertex = complementVertex;
                 }
@@ -126,7 +158,7 @@ public class DirectionsGenerator {
         double minDistance = Double.POSITIVE_INFINITY;
         for (Vertex vertex : vertexSet){
             double currentVertexDistance = idToDistanceMap.get(vertex.getId());
-            if (currentVertexDistance < minDistance){
+            if (currentVertexDistance <= minDistance){
                 minDistanceVertex = vertex;
                 minDistance = currentVertexDistance;
             }
@@ -167,6 +199,13 @@ public class DirectionsGenerator {
         return new Node(); // FOR NOW
     }
 
-
+    public static void main(String[] args) throws Exception{
+        OSMParser parser = new OSMParser(new File(args[0]));
+        parser.parse();
+        Map map = parser.getMap();
+        DirectionsGenerator dirGen = new DirectionsGenerator(map);
+        dirGen.findShortestPath(map.findNodeById("700355297"), map.findNodeById("213527379"));
+        int i =3;
+    }
 
 }

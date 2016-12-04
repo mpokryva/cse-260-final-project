@@ -4,6 +4,7 @@ import parsing.Map;
 import parsing.Node;
 import parsing.Way;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
 public interface Graph {
 
 
-    Edge constructEdge(Way way, Node startingNode, Node endingNode);
+    Edge constructEdge(Way way, Node startingNode, Node endingNode, HashMap<String, Vertex> idToVertexMap);
     void createGraph();
 
 
