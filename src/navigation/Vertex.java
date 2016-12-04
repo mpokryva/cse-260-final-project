@@ -55,4 +55,34 @@ public class Vertex {
     public ArrayList<Edge> getAdjacentEdges() {
         return adjacentEdges;
     }
+
+    /**
+     * Returns this vertex's hashcode.
+     *
+     * @return This vertex's hashcode.
+     */
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    /**
+     * Only equal if the two vertex's id's are equal.
+     *
+     * @param other The vertex to compare to.
+     * @return True if the two vertex's id's are equal.
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Vertex)) {
+            return false;
+        }
+        return this.getId().equals(((Vertex) other).getId());
+    }
+    
+    
+    
 }

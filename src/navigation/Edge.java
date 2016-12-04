@@ -84,4 +84,31 @@ public class Edge {
     public String getId() {
         return id;
     }
+
+    /**
+     * Returns this edge's hashcode.
+     *
+     * @return This edge's hashcode.
+     */
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    /**
+     * Only equal if the two edge's id's are equal.
+     *
+     * @param other The edge to compare to.
+     * @return True if the two edge's id's are equal.
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Edge)) {
+            return false;
+        }
+        return this.getId().equals(((Edge) other).getId());
+    }
 }
