@@ -6,6 +6,10 @@ package navigation;
 public class Edge {
 
     /**
+     * The id to of the way this edge represents.
+     */
+    private String id;
+    /**
      * The first vertex of this edge.
      */
     private Vertex first;
@@ -24,7 +28,8 @@ public class Edge {
      * @param first The first vertex.
      * @param second The second vertex.
      */
-    public Edge(Vertex first, Vertex second, double weight){
+    public Edge(String id, Vertex first, Vertex second, double weight){
+        this.id = id;
         this.first = first;
         this.second = second;
         this.weight = weight;
@@ -53,5 +58,30 @@ public class Edge {
      */
     public double getWeight(){
         return weight;
+    }
+
+    /**
+     * Returns the vertex of the edge that is not the vertex specified.
+     * Specified vertex must exist.
+     * @param vertex The vertex to not return/
+     * @return The complement of the specified vertex, if the edge has the specified vertex.
+     * Otherwise, throws an IllegalArgumentException.
+     * @throws IllegalArgumentException Thrown if edge does not have the specified vertex.
+     */
+    public Vertex getComplementVertex(Vertex vertex){
+        if (first.equals(vertex))
+            return second;
+        else if (second.equals(vertex))
+            return first;
+        else
+            throw new IllegalArgumentException();
+    }
+
+    /**
+     * Return's the id of the way this edge represents.
+     * @return The id of the way this edge represents.
+     */
+    public String getId() {
+        return id;
     }
 }

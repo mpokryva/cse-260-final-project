@@ -12,9 +12,9 @@ import java.util.List;
 public interface Graph {
 
 
-    Edge constructEdge(Way way);
+    Edge constructEdge(Way way, Node startingNode, Node endingNode);
+    void createGraph();
 
-    Vertex constructVertex(Node node);
 
 
 

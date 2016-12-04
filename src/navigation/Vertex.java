@@ -14,13 +14,14 @@ public class Vertex {
     /**
      * All the adjacentEdges connected to this vertex
      */
-    ArrayList<Edge> adjacentEdges;
+    private ArrayList<Edge> adjacentEdges;
     /**
      * Initializes a vertex based on the given id.
      * @param id The id of the vertex.
      */
     public Vertex(String id){
         this.id = id;
+        adjacentEdges = new ArrayList<>();
     }
 
     /**
@@ -37,5 +38,21 @@ public class Vertex {
      */
     public void addEdgeList(List<Edge> edgeList){
         adjacentEdges.addAll(edgeList);
+    }
+
+    /**
+     * Returns this vertex's id.
+     * @return This vertex's id.
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Returns this vertex's list of adjacent edges.
+     * @return This vertex's list of adjacent edges.
+     */
+    public ArrayList<Edge> getAdjacentEdges() {
+        return adjacentEdges;
     }
 }

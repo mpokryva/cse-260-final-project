@@ -3,8 +3,10 @@ package parsing;
 import navigation.Edge;
 import navigation.Graph;
 import navigation.Vertex;
+import navigation.VertexEdgeCollection;
 
 import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,7 +15,7 @@ import java.util.List;
 /**
  * Created by mpokr on 10/13/2016.
  */
-public class Map{
+public class Map implements Graph {
     List<Node> nodeList;     // List of nodes
     HashMap<String, Node> idToNodeMap;  // Map of id's of Nodes to Nodes.
     HashMap<String, Node> nameToNodeMap; // Map of names of Nodes to Nodes.
@@ -25,6 +27,7 @@ public class Map{
     private double maxLat;  // Maximum latitude of this map.
     private double minLon;  // Minimum longitude of this map.
     private double maxLon;  // Maximum longitude of this map.
+    private VertexEdgeCollection graph;
     /**
      * Distance from minimum latitude to maximum latitude.
      */
@@ -98,6 +101,7 @@ public class Map{
      * @return The weighted edge representing the specified way. Returns null if a faulty way is supplied
      * (a way with less than 2 nodes).
      */
+    @Override
     public Edge constructEdge(Way way, Node startingNode, Node endingNode) {
         List<Node> nodesInWay = findNodeSubListInWay(way, startingNode, endingNode);
         Iterator<Node> it = nodesInWay.iterator();
@@ -134,57 +138,47 @@ public class Map{
             weight += distance;
         }
         Vertex startingVertex = new Vertex(startingNode.getId());
-        Vertex endingVertex = new Vertex (endingNode.getId());
-        return new Edge(startingVertex, endingVertex, weight);
+        Vertex endingVertex = new Vertex(endingNode.getId());
+        return new Edge(way.getId(), startingVertex, endingVertex, weight);
     }
 
-    //@Override
-    /*
-    public Vertex constructVertex(Node node) {
-        List<Way> wayList = this.findWaysByNode(node);
-        List<Edge> edgeList = new ArrayList<>();
-        for (Way way : wayList){
-            constructEdge(way);
-        }
-        Vertex returnVertex = new Vertex(node.getId());
-        returnVertex.addEdgeList(edgeList);
-        return  returnVertex;
-    }
-    */
 
-    /*
-    public List<Edge> constructListEdges(Way way){
-        List<Node> nodesInWay = this.findNodesInWay(way);
-        List<Edge> edgeList = new ArrayList<>();
-        for (Node node : nodesInWay){
-            List<Way> waysWithNode = findWaysByNode(node);
-            // Check if there a more ways than the input way with the current node.
-            if (waysWithNode.size() > 1){
-                Vertex startingVertex = new Vertex(node.getId());
-                for (Way wayWithNode : waysWithNode){
-                    wayWithNode
-                }
-            }
-        }
-    }
-    */
-
-    public List<Edge> createGraph(Map map){
-        List<Edge> edgeList = new ArrayList<>();
-        for (Way way : wayList){
+    /**
+     * Creates a graph representation out of this map.
+     *
+     * @return The graph representation of this map.
+     */
+    @Override
+    public void createGraph() {
+        HashMap<String, Edge> idToEdgeMap = new HashMap<>();
+        for (Way way : wayList) {
             List<Node> nodesInWay = this.findNodesInWay(way);
             Node firstNode = nodesInWay.get(0);
-            Node lastNode = nodesInWay.get(nodesInWay.size()-1);
-            for (int i=1; i <nodesInWay.size(); i++){
-                List<Way> wayWithNode = findWaysByNode(nodesInWay.get(i));
-                if (wayWithNode.size() > 1){
+            Node lastNode = nodesInWay.get(nodesInWay.size() - 1);
+            for (int i = 1; i < nodesInWay.size(); i++) {
+                Node testNode = nodesInWay.get(i);
+                List<Way> wayWithNode = findWaysByNode(testNode);
+                if (wayWithNode.size() > 1 && !testNode.equals(firstNode) && !testNode.equals(lastNode)) {
                     Edge edge = constructEdge(way, firstNode, nodesInWay.get(i));
-                    edgeList.add(edge);
+                    idToEdgeMap.put(edge.getId(), edge);
                     firstNode = nodesInWay.get(i);
                 }
             }
         }
-        return edgeList;
+        HashMap<String, Vertex> idToVertexMap = new HashMap<>();
+        for (Edge edge : idToEdgeMap.values()) {
+            Vertex firstVertex = edge.getFirst();
+            Vertex secondVertex = edge.getSecond();
+            firstVertex.addEdge(edge);
+            secondVertex.addEdge(edge);
+            if (!idToVertexMap.containsKey(firstVertex.getId())) {
+                idToVertexMap.put(firstVertex.getId(), firstVertex);
+            }
+            if (!idToVertexMap.containsKey(secondVertex.getId())) {
+                idToVertexMap.put(secondVertex.getId(), secondVertex);
+            }
+        }
+        graph = new VertexEdgeCollection(idToVertexMap, idToEdgeMap);
     }
 
 
@@ -258,37 +252,37 @@ public class Map{
 
     /**
      * Returns a sub list of nodes in way, from a specified to node to another.
-     * @param way The way to find the nodes of.
+     *
+     * @param way       The way to find the nodes of.
      * @param firstNode The beginning node of the sub list.
-     * @param lastNode The ending node of the sub list.
+     * @param lastNode  The ending node of the sub list.
      * @return The sublist of nodes in the way.
      */
-    public List<Node> findNodeSubListInWay(Way way, Node firstNode, Node lastNode){
+    public List<Node> findNodeSubListInWay(Way way, Node firstNode, Node lastNode) {
         String firstRef = firstNode.getId();
         String lastRef = lastNode.getId();
-        int firstIndex = 0;
-        int lastIndex = 0;
+        Integer firstIndex = null;
+        Integer lastIndex = null;
         List<Node> nodesInWay = new ArrayList<>();
         List<String> nodeRefList = way.getNodeRefList();
-        for (int i=0; i < nodeRefList.size(); i++) {
+        for (int i = 0; i < nodeRefList.size(); i++) {
             Node foundNode = findNodeById(nodeRefList.get(i));
             // Checks if node exists (node ref is not bogus).
             if (foundNode != null) {
                 nodesInWay.add(foundNode);
-                if (lastIndex !=0 && firstIndex != 0)
-                    return nodesInWay.subList(firstIndex, lastIndex+1);
+                if (lastIndex != null && firstIndex != null)
+                    return nodesInWay.subList(firstIndex, lastIndex + 1);
 
-                if (foundNode.getId().equals(firstRef)){
+                if (foundNode.getId().equals(firstRef)) {
                     firstIndex = i;
-                }
-                else if (foundNode.getId().equals(lastRef)){
+                } else if (foundNode.getId().equals(lastRef)) {
                     lastIndex = i;
                 }
 
             }
 
         }
-        return nodesInWay.subList(firstIndex, lastIndex+1);
+        return nodesInWay.subList(firstIndex, lastIndex + 1);
 
 
     }
@@ -475,5 +469,14 @@ public class Map{
      */
     public double getLonRange() {
         return lonRange;
+    }
+
+    /**
+     * Returns this map's graph representation.
+     *
+     * @return This map's graph representation.
+     */
+    public VertexEdgeCollection getGraph() {
+        return graph;
     }
 }
