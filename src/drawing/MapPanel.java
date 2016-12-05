@@ -161,8 +161,7 @@ public class MapPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 if (SwingUtilities.isRightMouseButton(e)) {
-                    String[] possibilities = {"Mark as starting location", "Mark as ending location",
-                            "Drive here from current location"};
+                    String[] possibilities = {"Mark as starting location", "Mark as ending location"};
                     String s = (String) JOptionPane.showInputDialog(MapPanel.this, null,
                             "Location selection", JOptionPane.PLAIN_MESSAGE,
                             null, possibilities, null);
@@ -172,8 +171,6 @@ public class MapPanel extends JPanel {
                         repaint();
                     } else if (s.equals(possibilities[1])) {
                         endingNode = map.findNearestNode(currentCoords[0], currentCoords[1]);
-                    } else {
-                        // Activate "Drive there" mode
                     }
                 }
             }

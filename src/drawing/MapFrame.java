@@ -89,8 +89,6 @@ public class MapFrame extends JFrame implements GPSListener {
         addMapPanelClickListener();
         addMenu();
         addNavigationPanel();
-        JOptionPane.showMessageDialog(this, "File selection only partially working. + \n +" +
-                "Select at your own risk.");
     }
 
     /**
@@ -132,7 +130,8 @@ public class MapFrame extends JFrame implements GPSListener {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                setMode(DRIVE_MODE);
+                if (mapPanel.isEndingLocationSelected() || mapPanel.isPathSelected())
+                    setMode(DRIVE_MODE);
             }
         });
         getDirectionsButton.addMouseListener(new MouseAdapter() {
@@ -245,6 +244,10 @@ public class MapFrame extends JFrame implements GPSListener {
     public void processEvent(GPSEvent e) {
         currentLon = e.getLongitude();
         currentLat = e.getLatitude();
+        if (!mapPanel.isStartingLocationSelected() && mapPanel.isEndingLocationSelected()){
+            // "Drive-there" mode.
+            calculateAndSendPath(map.findNearestNode(currentLon, currentLat), mapPanel.getEndingNode());
+        }
         if (mode.equals(DRIVE_MODE)) {
             drawPerson(currentLon, currentLat);
             Node currentNode = map.findNearestNode(currentLon, currentLat);
