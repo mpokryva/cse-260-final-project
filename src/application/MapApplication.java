@@ -23,7 +23,7 @@ public class MapApplication {
         parser.parse();
         MapFrame mapFrame = new MapFrame(parser.getMap());
         gpsDevice.addGPSListener(mapFrame);
-        //ShortestPathGenerator test = new ShortestPathGenerator(parser.getMap());
+        ShortestPathGenerator test = new ShortestPathGenerator();
         test.execute(parser.getMap().getGraph().getIdToVertexMap().get("1924650362"));
         LinkedList<Vertex> path = test.getPath(parser.getMap().getGraph().getIdToVertexMap().get("213560856"));
         mapFrame.getMapPanel().setPath(path);
