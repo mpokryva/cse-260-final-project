@@ -17,10 +17,6 @@ public class DirectionsGenerator {
      * This generator's associated map.
      */
     private Map map;
-    /**
-     * This generator's associated map graph.
-     */
-    private Graph mapGraph;
 
     /**
      * The current (latest & relevant) path this generator has generated.
@@ -70,12 +66,19 @@ public class DirectionsGenerator {
     }
 
     /**
-     * Checks if way is in the current path of the generator.
+     * Checks if coordinates are on the path.
      *
-     * @return True if way in is the path. False otherwise.
+     * @return True if coordinates are part of the is the path. False otherwise.
      */
-    public boolean isWayInCurrentPath(Way way) {
-        return true; //FOR NOW.
+    public boolean areCoordinatesOnPath(double lon, double lat){
+        for (Vertex vertex: currentPath){
+            String vertexId = vertex.getId();
+            Node correspondingNode = map.findNodeById(vertexId);
+            if (correspondingNode.getLon() == lon && correspondingNode.getLat() == lat){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

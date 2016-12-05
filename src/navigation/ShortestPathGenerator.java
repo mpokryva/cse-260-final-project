@@ -21,6 +21,7 @@ public class ShortestPathGenerator {
     private HashSet<Vertex> unvisitedVertexSet;
     private HashMap<Vertex, Vertex> predecessorMap;
     private HashMap<Vertex, Double> distanceMap;
+    private Vertex currentInitial;
 
     public ShortestPathGenerator(VertexEdgeCollection vertexEdgeCollection) {
         this.idToVertexMap = vertexEdgeCollection.getIdToVertexMap();

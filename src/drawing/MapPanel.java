@@ -31,10 +31,6 @@ public class MapPanel extends JPanel {
      */
     private double zoom;
     /**
-     * A constant that shifts map to left to avoid showing long tail.
-     */
-    private final double RIGHT_SHIFT = 0.2;
-    /**
      * The center longitude, in map coordinates of this map.
      */
     private double centerLon;
@@ -48,14 +44,6 @@ public class MapPanel extends JPanel {
      */
     private int mouseWheelClicks;
     /**
-     * Maximum zoom out (in clicks)
-     */
-    private static int MAXIMUM_ZOOM_OUT = -20;
-    /**
-     * Maximum zoom in (in clicks)
-     */
-    private static int MAXIMUM_ZOOM_IN = 40;
-    /**
      * The node marked as the starting location.
      */
     private Node startingNode;
@@ -68,17 +56,10 @@ public class MapPanel extends JPanel {
      * If false, they are hidden.
      */
     private boolean boundariesShowing;
-
-    private ArrayList<Node> pathToDraw;
     /**
-     * Images of pin icons, like in Google Maps. Will implement in the future.
+     * The driving path to draw, if exists.
      */
-    private static BufferedImage STARTING_PIN_ICON;
-    private static BufferedImage ENDING_PIN_ICON;
-    private JLabel startingPin;
-    private JLabel endingPin;
-
-
+    private ArrayList<Node> pathToDraw;
     /**
      * Initializes the fields of this MapPanel, and not much else.
      *
@@ -92,13 +73,6 @@ public class MapPanel extends JPanel {
         centerLat = map.getCenterLat();
         addRightMouseClickListener();
         addDoubleClickListener();
-        try {
-            STARTING_PIN_ICON = ImageIO.read(new File("GreenPinIcon.png"));
-            ENDING_PIN_ICON = ImageIO.read(new File("RedPinIcon.png"));
-
-        } catch (IOException e) {
-            System.out.print("No such file exists");
-        }
     }
 
     public void drawPath(LinkedList<Vertex> path) {
@@ -515,5 +489,17 @@ public class MapPanel extends JPanel {
 
     public void setPath(LinkedList<Vertex> path){
         drawPath(path);
+    }
+
+    public boolean areBothLocationSelected(){
+        return (startingNode != null && endingNode != null);
+    }
+
+    public boolean isStartingLocationSelected(){
+        return (startingNode != null);
+    }
+
+    public boolean isEndingLocationSelected(){
+        return (endingNode != null);
     }
 }

@@ -5,6 +5,7 @@ import com.starkeffect.highway.GPSEvent;
 import com.starkeffect.highway.GPSListener;
 import navigation.DirectionsGenerator;
 import navigation.Person;
+import navigation.Vertex;
 import parsing.Map;
 import parsing.Node;
 import parsing.OSMParser;
@@ -16,6 +17,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.LinkedList;
 
 /**
  * Top-level frame holding the map, the notification area, etc.
@@ -81,6 +83,7 @@ public class MapFrame extends JFrame implements GPSListener {
         mapPanel.recenter();
         addMapPanelClickListener();
         addMenu();
+        addNavigationPanel();
     }
 
     /**
@@ -101,6 +104,49 @@ public class MapFrame extends JFrame implements GPSListener {
                 repaint();
             }
         });
+    }
+
+    private void addNavigationPanel(){
+        JPanel navigationPanel = new JPanel();
+        GridLayout gridLayout = new GridLayout(0, 1);
+        navigationPanel.setLayout(gridLayout);
+        JButton driveButton = new JButton("Drive");
+        navigationPanel.add(driveButton);
+        JButton getDirectionsButton = new JButton("Get directions");
+        navigationPanel.add(getDirectionsButton);
+        JButton stopButton = new JButton("Stop navigation");
+        navigationPanel.add(stopButton);
+        addNavigationButtonListeners(driveButton, getDirectionsButton, stopButton);
+        this.add(navigationPanel, BorderLayout.WEST);
+    }
+
+    private void addNavigationButtonListeners(JButton driveButton, JButton getDirectionsButton, JButton stopButton){
+        driveButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                //if (mapPanel)
+            }
+        });
+        getDirectionsButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (mapPanel.areBothLocationSelected()){
+                    Node startingNode = mapPanel.getStartingNode();
+                    Node endingNode = mapPanel.getEndingNode();
+                    calculateAndSendPath(startingNode, endingNode);
+                }
+                else {
+                    notificationPanel.setText("Need to select two locations.");
+                }
+            }
+        });
+    }
+
+    private void calculateAndSendPath(Node startingNode, Node endingNode){
+        LinkedList<Vertex> path = directionsGenerator.findShortestPath(startingNode, endingNode);
+        mapPanel.drawPath(path);
     }
 
     private void addMenu() {
@@ -130,6 +176,11 @@ public class MapFrame extends JFrame implements GPSListener {
     public void processEvent(GPSEvent e) {
         currentLon = e.getLongitude();
         currentLat = e.getLatitude();
+        boolean onPath = directionsGenerator.areCoordinatesOnPath(currentLon, currentLat);
+        if (!onPath){
+            notificationPanel.setText("Off route. Recalculating...");
+            calculateAndSendPath(new Node(currentLon, currentLat), directionsGenerator.pa);
+        }
     }
 
     /**
