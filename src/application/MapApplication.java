@@ -23,6 +23,5 @@ public class MapApplication {
         parser.parse();
         MapFrame mapFrame = new MapFrame(parser.getMap());
         gpsDevice.addGPSListener(mapFrame);
-        //mapFrame.getMapPanel().setPath(path);
     }
 }

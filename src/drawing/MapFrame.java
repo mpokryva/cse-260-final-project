@@ -149,7 +149,11 @@ public class MapFrame extends JFrame implements GPSListener {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                String prevMode = mode;
                 mode = VIEW_MODE;
+                if (!prevMode.equals(mode)){
+                    notificationPanel.setText("Stopped driving.");
+                }
             }
         });
     }
