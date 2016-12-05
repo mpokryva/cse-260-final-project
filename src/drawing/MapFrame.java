@@ -1,5 +1,6 @@
 package drawing;
 
+import application.MapApplication;
 import com.starkeffect.highway.GPSDevice;
 import com.starkeffect.highway.GPSEvent;
 import com.starkeffect.highway.GPSListener;
@@ -43,6 +44,8 @@ public class MapFrame extends JFrame implements GPSListener {
      * Calculates directions from one point to another.
      */
     private DirectionsGenerator directionsGenerator;
+
+    private MapApplication mapApplication;
     /**
      * This MapFrame's mode. Can be DRIVE_MODE, or VIEW_MODE.
      */
@@ -63,8 +66,6 @@ public class MapFrame extends JFrame implements GPSListener {
         mode = VIEW_MODE;
         this.map = map;
         directionsGenerator = new DirectionsGenerator(map);
-        // gpsDevice = new GPSDevice();
-        //gpsDevice.addGPSListener(new Person());
         this.setLayout(new BorderLayout());
         this.mapPanel = new MapPanel(map);
         this.notificationPanel = new NotificationPanel(500, 300);
@@ -83,6 +84,8 @@ public class MapFrame extends JFrame implements GPSListener {
         addMapPanelClickListener();
         addMenu();
         addNavigationPanel();
+        JOptionPane.showMessageDialog(this, "File selection only partially working. + \n +" +
+                "Select at your own risk.");
     }
 
     /**
@@ -191,35 +194,31 @@ public class MapFrame extends JFrame implements GPSListener {
         this.setJMenuBar(menuBar);
     }
 
-    private void launchFileSelection(){
+    private void launchFileSelection() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
         int result = fileChooser.showOpenDialog(getParent());
-        if (result == JFileChooser.APPROVE_OPTION){
+        if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-            try {
-                String fileType = Files.probeContentType(selectedFile.toPath());
-                if (fileType.equals("osm")){
-                    OSMParser parser = new OSMParser(selectedFile);
-                    try {
-                        parser.parse();
-                        MapFrame.this.setMap()
-                    }
-                    catch (Exception e){
-                        System.out.println("File could not be parsed.");
-                    }
-                }
-                else {
-                    JOptionPane.showMessageDialog(getParent(), "File must have extension .osm");
-                }
+            String extension = "";
+            int i = selectedFile.getName().lastIndexOf('.');
+            if (i > 0) {
+                extension = selectedFile.getName().substring(i + 1);
             }
-            catch (IOException e){
-                System.out.println("Unable to determine file type for " + selectedFile.getName());
+            if (extension.equals("osm")) {
+                try {
+                    MapApplication.launch(selectedFile);
+                } catch (Exception e) {
+                    System.out.println("File could not be launched.");
+                }
+            } else {
+                JOptionPane.showMessageDialog(getParent(), "File must have extension .osm");
             }
+
         }
     }
 
-    private void addFileMenuitemListeners(JMenuItem openFile, JMenuItem quitApplication){
+    private void addFileMenuitemListeners(JMenuItem openFile, JMenuItem quitApplication) {
         openFile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -259,6 +258,7 @@ public class MapFrame extends JFrame implements GPSListener {
 
     /**
      * Determines if the driving target has been reached yet.
+     *
      * @param currentNode The current node of the person.
      * @return True if finished driving. False otherwise.
      */
@@ -268,6 +268,7 @@ public class MapFrame extends JFrame implements GPSListener {
 
     /**
      * Informs the map panel to draw a "person"
+     *
      * @param lon The longitude of the person.
      * @param lat The latitude of the person.
      */
@@ -289,8 +290,8 @@ public class MapFrame extends JFrame implements GPSListener {
         this.mode = newMode;
     }
 
-    private setMap(){
-
+    public void setMapApplication(MapApplication mapApplication) {
+        this.mapApplication = mapApplication;
     }
 
 }
