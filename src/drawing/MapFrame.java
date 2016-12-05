@@ -4,7 +4,6 @@ import com.starkeffect.highway.GPSDevice;
 import com.starkeffect.highway.GPSEvent;
 import com.starkeffect.highway.GPSListener;
 import navigation.DirectionsGenerator;
-import navigation.Person;
 import navigation.Vertex;
 import parsing.Map;
 import parsing.Node;
@@ -17,6 +16,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.LinkedList;
 
 /**
@@ -43,12 +44,7 @@ public class MapFrame extends JFrame implements GPSListener {
      */
     private DirectionsGenerator directionsGenerator;
     /**
-     * A person located somewhere on this map, whose location changes.
-     */
-    private Person person;
-    /**
-     * This MapFrame's mode. Can be DRIVE_THERE, or SELECTING_LOCATION, for ex.
-     * Not yet implemented.
+     * This MapFrame's mode. Can be DRIVE_MODE, or VIEW_MODE.
      */
     private String mode;
 
@@ -109,7 +105,7 @@ public class MapFrame extends JFrame implements GPSListener {
         });
     }
 
-    private void addNavigationPanel(){
+    private void addNavigationPanel() {
         JPanel navigationPanel = new JPanel();
         GridLayout gridLayout = new GridLayout(0, 1);
         navigationPanel.setLayout(gridLayout);
@@ -123,7 +119,7 @@ public class MapFrame extends JFrame implements GPSListener {
         this.add(navigationPanel, BorderLayout.WEST);
     }
 
-    private void addNavigationButtonListeners(JButton driveButton, JButton getDirectionsButton, JButton stopButton){
+    private void addNavigationButtonListeners(JButton driveButton, JButton getDirectionsButton, JButton stopButton) {
         driveButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -135,12 +131,11 @@ public class MapFrame extends JFrame implements GPSListener {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                if (mapPanel.areBothLocationSelected()){
+                if (mapPanel.areBothLocationSelected()) {
                     Node startingNode = mapPanel.getStartingNode();
                     Node endingNode = mapPanel.getEndingNode();
                     calculateAndSendPath(startingNode, endingNode);
-                }
-                else {
+                } else {
                     notificationPanel.setText("Need to select two locations.");
                 }
             }
@@ -151,16 +146,16 @@ public class MapFrame extends JFrame implements GPSListener {
                 super.mouseClicked(e);
                 String prevMode = mode;
                 mode = VIEW_MODE;
-                if (!prevMode.equals(mode)){
+                if (!prevMode.equals(mode)) {
                     notificationPanel.setText("Stopped driving.");
                 }
             }
         });
     }
 
-    private void calculateAndSendPath(Node startingNode, Node endingNode){
+    private void calculateAndSendPath(Node startingNode, Node endingNode) {
         LinkedList<Vertex> path = directionsGenerator.findShortestPath(startingNode, endingNode);
-        if (path != null){
+        if (path != null) {
             mapPanel.drawPath(path);
         }
     }
@@ -183,31 +178,77 @@ public class MapFrame extends JFrame implements GPSListener {
                 mapPanel.clearSelection();
             }
         });
+        JMenu fileSelectionMenu = new JMenu("File");
+        JMenuItem openFile = new JMenuItem("Open");
+        JMenuItem quitApplication = new JMenuItem("Quit");
         appearanceMenu.add(showHideBorders);
+        addFileMenuitemListeners(openFile, quitApplication);
         appearanceMenu.add(clearSelection);
+        fileSelectionMenu.add(openFile);
+        fileSelectionMenu.add(quitApplication);
+        menuBar.add(fileSelectionMenu);
         menuBar.add(appearanceMenu);
         this.setJMenuBar(menuBar);
     }
 
-    public static void main(String[] args) throws Exception {
-        OSMParser parser = new OSMParser(new File(args[0]));
-        parser.parse();
-        MapFrame mapFrame = new MapFrame(parser.getMap());
-        System.out.println("Hello");
+    private void launchFileSelection(){
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        int result = fileChooser.showOpenDialog(getParent());
+        if (result == JFileChooser.APPROVE_OPTION){
+            File selectedFile = fileChooser.getSelectedFile();
+            try {
+                String fileType = Files.probeContentType(selectedFile.toPath());
+                if (fileType.equals("osm")){
+                    OSMParser parser = new OSMParser(selectedFile);
+                    try {
+                        parser.parse();
+                        MapFrame.this.setMap()
+                    }
+                    catch (Exception e){
+                        System.out.println("File could not be parsed.");
+                    }
+                }
+                else {
+                    JOptionPane.showMessageDialog(getParent(), "File must have extension .osm");
+                }
+            }
+            catch (IOException e){
+                System.out.println("Unable to determine file type for " + selectedFile.getName());
+            }
+        }
     }
+
+    private void addFileMenuitemListeners(JMenuItem openFile, JMenuItem quitApplication){
+        openFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                launchFileSelection();
+            }
+        });
+
+        // Close the application.
+        quitApplication.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+    }
+
 
     @Override
     public void processEvent(GPSEvent e) {
         currentLon = e.getLongitude();
         currentLat = e.getLatitude();
-        if (mode.equals(DRIVE_MODE)){
+        if (mode.equals(DRIVE_MODE)) {
             drawPerson(currentLon, currentLat);
             Node currentNode = map.findNearestNode(currentLon, currentLat);
             boolean onPath = directionsGenerator.areCoordinatesOnPath(currentLon, currentLat);
-            if (reachedTarget(currentNode)){
+            if (reachedTarget(currentNode)) {
                 setMode(VIEW_MODE);
             }
-            if (!onPath){
+            if (!onPath) {
                 notificationPanel.setText("Off route. Recalculating...");
 
                 calculateAndSendPath(currentNode, directionsGenerator.getCurrentTarget());
@@ -216,30 +257,22 @@ public class MapFrame extends JFrame implements GPSListener {
         }
     }
 
-    private boolean reachedTarget(Node currentNode){
+    /**
+     * Determines if the driving target has been reached yet.
+     * @param currentNode The current node of the person.
+     * @return True if finished driving. False otherwise.
+     */
+    private boolean reachedTarget(Node currentNode) {
         return (currentNode.equals(directionsGenerator.getCurrentTarget()));
     }
 
-    private void drawPerson(double lon, double lat){
+    /**
+     * Informs the map panel to draw a "person"
+     * @param lon The longitude of the person.
+     * @param lat The latitude of the person.
+     */
+    private void drawPerson(double lon, double lat) {
         mapPanel.drawPerson(lon, lat);
-    }
-
-    /**
-     * Returns the user-selected starting node.
-     *
-     * @return The user-selected starting node.
-     */
-    public Node getStartingNode() {
-        return mapPanel.getStartingNode();
-    }
-
-    /**
-     * Returns the user selected ending node.
-     *
-     * @return The user-selected ending node.
-     */
-    public Node getEndingNode() {
-        return mapPanel.getEndingNode();
     }
 
     /**
@@ -251,20 +284,13 @@ public class MapFrame extends JFrame implements GPSListener {
         return map;
     }
 
-    /**
-     * Returns the MapFrame's GPSDevice
-     *
-     * @return This MapFrame's GPSDevice
-     */
-    public void getGPSDevice() {
-        // Not really void. Does not return GPSDevice for compilation purposes.
-    }
 
     public void setMode(String newMode) {
         this.mode = newMode;
     }
 
-    public MapPanel getMapPanel() {
-        return mapPanel;
+    private setMap(){
+
     }
+
 }

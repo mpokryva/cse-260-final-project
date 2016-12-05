@@ -173,7 +173,6 @@ public class MapPanel extends JPanel {
                     } else if (s.equals(possibilities[1])) {
                         endingNode = map.findNearestNode(currentCoords[0], currentCoords[1]);
                     } else {
-
                         // Activate "Drive there" mode
                     }
                 }
