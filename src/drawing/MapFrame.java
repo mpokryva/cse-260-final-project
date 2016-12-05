@@ -172,5 +172,7 @@ public class MapFrame extends JFrame implements GPSListener {
         this.mode = newMode;
     }
 
-
+    public MapPanel getMapPanel() {
+        return mapPanel;
+    }
 }

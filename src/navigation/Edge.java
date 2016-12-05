@@ -35,6 +35,8 @@ public class Edge {
         this.weight = weight;
     }
 
+
+
     /**
      * Returns the first vertex of this edge.
      * @return The first vertex of this edge.

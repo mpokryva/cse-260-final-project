@@ -56,6 +56,14 @@ public class Vertex {
         return adjacentEdges;
     }
 
+    public ArrayList<Vertex> getNeighborVertices(){
+        ArrayList<Vertex> neighbors = new ArrayList<>();
+        for (Edge adjacentEdge : adjacentEdges){
+            neighbors.add(adjacentEdge.getComplementVertex(this));
+        }
+        return neighbors;
+    }
+
     /**
      * Returns this vertex's hashcode.
      *

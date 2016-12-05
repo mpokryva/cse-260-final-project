@@ -1,6 +1,7 @@
 package drawing;
 
 
+import navigation.Vertex;
 import parsing.Map;
 import parsing.Node;
 import parsing.Way;
@@ -13,6 +14,8 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -66,7 +69,7 @@ public class MapPanel extends JPanel {
      */
     private boolean boundariesShowing;
 
-
+    private ArrayList<Node> pathToDraw;
     /**
      * Images of pin icons, like in Google Maps. Will implement in the future.
      */
@@ -98,10 +101,18 @@ public class MapPanel extends JPanel {
         }
     }
 
+    public void drawPath(LinkedList<Vertex> path) {
+        pathToDraw = new ArrayList<>();
+        for (Vertex vertex : path) {
+            pathToDraw.add(map.findNodeById(vertex.getId()));
+        }
+        repaint();
+    }
+
     /**
      * Called once as part of initialization, in order to properly center and zoom map.
      */
-    public void recenter(){
+    public void recenter() {
         double panelWidth = this.getWidth();
         double panelHeight = this.getHeight();
         double largerDimension;
@@ -116,7 +127,7 @@ public class MapPanel extends JPanel {
             largerRange = lonRange;
         else
             largerRange = latRange;
-        zoom = largerDimension/largerRange;
+        zoom = largerDimension / largerRange;
     }
 
     /**
@@ -190,15 +201,15 @@ public class MapPanel extends JPanel {
 
     }
 
-    private void addDoubleClickListener(){
+    private void addDoubleClickListener() {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                if (e.getClickCount() == 2){
+                if (e.getClickCount() == 2) {
                     double[] mapCoords = getMouseLocationAsCoords(e);
                     List<Way> wayList = map.findWaysByLonLat(mapCoords[0], mapCoords[1]);
-                    for (Way way : wayList){
+                    for (Way way : wayList) {
                         System.out.println(way.getName());
                     }
                     System.out.println(map.findNearestNode(mapCoords[0], mapCoords[1]).getId());
@@ -218,28 +229,28 @@ public class MapPanel extends JPanel {
                 double amountRotated = -1 * e.getPreciseWheelRotation();
                 // Makes sure user can't zoom infinitely in or out.
                 //if ((mouseWheelClicks >= MAXIMUM_ZOOM_OUT || amountRotated > 0) &&
-                   //     (mouseWheelClicks <= MAXIMUM_ZOOM_IN || amountRotated < 0)) {
-                    double scaleFactor = 10;    //10 chosen arbitrarily.
-                    double zoomScaleFactor = zoom / scaleFactor;
-                    double amountToZoom = amountRotated * zoomScaleFactor;
-                    zoom += amountToZoom;
+                //     (mouseWheelClicks <= MAXIMUM_ZOOM_IN || amountRotated < 0)) {
+                double scaleFactor = 10;    //10 chosen arbitrarily.
+                double zoomScaleFactor = zoom / scaleFactor;
+                double amountToZoom = amountRotated * zoomScaleFactor;
+                zoom += amountToZoom;
 
-                    mouseWheelClicks += amountRotated;
-                    double[] currentCoords = getMouseLocationAsCoords(e);
+                mouseWheelClicks += amountRotated;
+                double[] currentCoords = getMouseLocationAsCoords(e);
 
-                    if (currentCoords[0] != prevMouseCoords[0] || currentCoords[1] != prevMouseCoords[1]) {
-                        if (amountRotated > 0) {
-                            setCenterCoords(centerLon + ((currentCoords[0] - centerLon) / scaleFactor), centerLat + ((currentCoords[1] - centerLat) / scaleFactor));
-                        } else {
-                            setCenterCoords(centerLon - ((currentCoords[0] - centerLon) / scaleFactor), centerLat - ((currentCoords[1] - centerLat) / scaleFactor));
-                        }
-                        prevMouseCoords[0] = currentCoords[0];
-                        prevMouseCoords[1] = currentCoords[1];
+                if (currentCoords[0] != prevMouseCoords[0] || currentCoords[1] != prevMouseCoords[1]) {
+                    if (amountRotated > 0) {
+                        setCenterCoords(centerLon + ((currentCoords[0] - centerLon) / scaleFactor), centerLat + ((currentCoords[1] - centerLat) / scaleFactor));
+                    } else {
+                        setCenterCoords(centerLon - ((currentCoords[0] - centerLon) / scaleFactor), centerLat - ((currentCoords[1] - centerLat) / scaleFactor));
                     }
-                    repaint();
+                    prevMouseCoords[0] = currentCoords[0];
+                    prevMouseCoords[1] = currentCoords[1];
                 }
+                repaint();
+            }
 
-          //  }
+            //  }
         });
     }
 
@@ -272,9 +283,9 @@ public class MapPanel extends JPanel {
         for (Way way : wayList) {
             int wayPriority = way.getWayPriority();
             // Checks that map is zoomed in enough.
-            if (wayPriority*1000 < zoom){
+            if (wayPriority * 1000 < zoom) {
                 // Checks if way is boundary, and if so, if it should be drawn.
-                if (!way.isBoundary() || boundariesShowing){
+                if (!way.isBoundary() || boundariesShowing) {
                     g.setColor(way.getColor());
                     List<Node> nodesInWay = map.findNodesInWay(way);
                     Node firstNode = nodesInWay.get(0);
@@ -291,11 +302,10 @@ public class MapPanel extends JPanel {
                     }
                     g2.setColor(way.getColor());
                     g2.setStroke(new BasicStroke(way.getWayThickness() + mouseWheelClicks / 10));
-                    Node lastNode = nodesInWay.get(nodesInWay.size()-1);
                 /*
                 If the way is a water feature, we fill it.
                  */
-                    if (way.isWater()){
+                    if (way.isWater()) {
                         // wayLine.closePath();
                         g2.fill(wayLine);
                     }
@@ -311,6 +321,23 @@ public class MapPanel extends JPanel {
         if (endingNode != null) {
             drawLocationPin(g2, endingNode, Color.RED);
         }
+        if (pathToDraw != null) {
+            g2.setColor(Color.RED);
+            Node firstNode = pathToDraw.get(0);
+            double firstLat = convertLatToPixels(firstNode.getLat());
+            double firstLon = convertLonToPixels(firstNode.getLon(), firstNode.getLat());
+            Path2D.Double wayLine = new Path2D.Double();
+            wayLine.moveTo(firstLon, firstLat);
+            for (int i = 1; i < pathToDraw.size(); i++) {
+                double lat = pathToDraw.get(i).getLat();
+                double lon = pathToDraw.get(i).getLon();
+                double pixelLat = convertLatToPixels(lat);
+                double pixelLon = convertLonToPixels(lon, lat);
+                wayLine.lineTo(pixelLon, pixelLat);
+            }
+            g2.draw(wayLine);
+        }
+
     }
 
     /**
@@ -470,6 +497,7 @@ public class MapPanel extends JPanel {
     /**
      * If set to true, map boundaries will be shown.
      * If false, they wil be hidden.
+     *
      * @param boundariesShowing Value specifying if boundaries should be shown.
      */
     public void setBoundariesShowing(boolean boundariesShowing) {
@@ -478,9 +506,14 @@ public class MapPanel extends JPanel {
 
     /**
      * Returns a vlaue specifying if boundaries are shown.
+     *
      * @return True, if boundaries are shown. False otherwise.
      */
     public boolean isBoundariesShowing() {
         return boundariesShowing;
+    }
+
+    public void setPath(LinkedList<Vertex> path){
+        drawPath(path);
     }
 }

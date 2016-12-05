@@ -2,12 +2,15 @@ package application;
 
 import com.starkeffect.highway.GPSDevice;
 import drawing.MapFrame;
+import navigation.ShortestPathGenerator;
+import navigation.Vertex;
 import org.xml.sax.SAXException;
 import parsing.OSMParser;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 
 /**
  * Created by mpokr on 11/23/2016.
@@ -20,5 +23,9 @@ public class MapApplication {
         parser.parse();
         MapFrame mapFrame = new MapFrame(parser.getMap());
         gpsDevice.addGPSListener(mapFrame);
+        //ShortestPathGenerator test = new ShortestPathGenerator(parser.getMap());
+        test.execute(parser.getMap().getGraph().getIdToVertexMap().get("1924650362"));
+        LinkedList<Vertex> path = test.getPath(parser.getMap().getGraph().getIdToVertexMap().get("213560856"));
+        mapFrame.getMapPanel().setPath(path);
     }
 }
