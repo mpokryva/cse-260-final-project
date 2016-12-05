@@ -45,7 +45,6 @@ public class MapFrame extends JFrame implements GPSListener {
      */
     private DirectionsGenerator directionsGenerator;
 
-    private MapApplication mapApplication;
     /**
      * This MapFrame's mode. Can be DRIVE_MODE, or VIEW_MODE.
      */
@@ -53,7 +52,13 @@ public class MapFrame extends JFrame implements GPSListener {
 
     private GPSDevice gpsDevice;
 
+    /**
+     * Current longitude of person.
+     */
     private double currentLon;
+    /**
+     * Current latitude of person.
+     */
     private double currentLat;
 
     /**
@@ -286,12 +291,14 @@ public class MapFrame extends JFrame implements GPSListener {
     }
 
 
-    public void setMode(String newMode) {
+    /**
+     * Set the mode of this map frame.
+     * @param newMode The new mode.
+     */
+    private void setMode(String newMode) {
         this.mode = newMode;
     }
 
-    public void setMapApplication(MapApplication mapApplication) {
-        this.mapApplication = mapApplication;
-    }
+
 
 }

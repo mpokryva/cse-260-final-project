@@ -20,7 +20,6 @@ public class DirectionsGenerator {
     /**
      * This generator's associated map graph.
      */
-    private Graph mapGraph;
 
     /**
      * The current (latest & relevant) path this generator has generated.
@@ -29,6 +28,7 @@ public class DirectionsGenerator {
     private ShortestPathGenerator pathGenerator;
     private Node currentTarget;
     private Node currentInitial;
+
     /**
      * Initializes a DirectionsGenerator based on the specified Map.
      */
@@ -77,15 +77,26 @@ public class DirectionsGenerator {
      *
      * @return True if coordinates are part of the is the path. False otherwise.
      */
-    public boolean areCoordinatesOnPath(double lon, double lat){
-        for (Vertex vertex: currentPath){
+    public boolean areCoordinatesOnPath(double lon, double lat) {
+        for (Vertex vertex : currentPath) {
             String vertexId = vertex.getId();
             Node correspondingNode = map.findNodeById(vertexId);
-            if (correspondingNode.getLon() == lon && correspondingNode.getLat() == lat){
+            if (correspondingNode.getLon() == lon && correspondingNode.getLat() == lat) {
                 return true;
             }
         }
         return false;
+    }
+
+
+    /**
+     * Returns the ending point of this generator's current path.
+     *
+     * @return The ending point of this generator's current path.
+     */
+
+    public Node getCurrentTarget() {
+        return currentTarget;
     }
 
     /**
@@ -93,34 +104,9 @@ public class DirectionsGenerator {
      *
      * @return The starting point of this generator's current path.
      */
-    private Node getCurrentStartingPoint() {
-        return new Node(); // FOR NOW
-    }
-
-    /**
-     * Returns the ending point of this generator's current path.
-     *
-     * @return The ending point of this generator's current path.
-     */
-    private Node getCurrentEndingPoint() {
-        return new Node(); // FOR NOW
-    }
-
-    public Node getCurrentTarget() {
-        return currentTarget;
-    }
-
     public Node getCurrentInitial() {
         return currentInitial;
     }
 
-    public static void main(String[] args) throws Exception {
-        OSMParser parser = new OSMParser(new File(args[0]));
-        parser.parse();
-        Map map = parser.getMap();
-        DirectionsGenerator dirGen = new DirectionsGenerator(map);
-        dirGen.findShortestPath(map.findNodeById("700355297"), map.findNodeById("213527379"));
-        int i = 3;
-    }
 
 }
