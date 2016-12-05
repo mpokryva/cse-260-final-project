@@ -17,13 +17,18 @@ public class DirectionsGenerator {
      * This generator's associated map.
      */
     private Map map;
+    /**
+     * This generator's associated map graph.
+     */
+    private Graph mapGraph;
 
     /**
      * The current (latest & relevant) path this generator has generated.
      */
     private LinkedList<Vertex> currentPath;
     private ShortestPathGenerator pathGenerator;
-
+    private Node currentTarget;
+    private Node currentInitial;
     /**
      * Initializes a DirectionsGenerator based on the specified Map.
      */
@@ -46,6 +51,8 @@ public class DirectionsGenerator {
         if (validateNodes(startingNode, endingNode)) {
             pathGenerator.execute(startingNode.getId());
             path = pathGenerator.getPath(endingNode.getId());
+            currentInitial = startingNode;
+            currentTarget = endingNode;
         }
         currentPath = path;
         return path;
@@ -97,6 +104,14 @@ public class DirectionsGenerator {
      */
     private Node getCurrentEndingPoint() {
         return new Node(); // FOR NOW
+    }
+
+    public Node getCurrentTarget() {
+        return currentTarget;
+    }
+
+    public Node getCurrentInitial() {
+        return currentInitial;
     }
 
     public static void main(String[] args) throws Exception {

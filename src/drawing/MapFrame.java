@@ -23,6 +23,8 @@ import java.util.LinkedList;
  * Top-level frame holding the map, the notification area, etc.
  */
 public class MapFrame extends JFrame implements GPSListener {
+    private static final String DRIVE_MODE = "DRIVE_MODE";
+    private static final String VIEW_MODE = "VIEW_MODE";
     /**
      * Contains the actual map
      */
@@ -62,6 +64,7 @@ public class MapFrame extends JFrame implements GPSListener {
      */
 
     public MapFrame(Map map) {
+        mode = VIEW_MODE;
         this.map = map;
         directionsGenerator = new DirectionsGenerator(map);
         // gpsDevice = new GPSDevice();
@@ -125,7 +128,7 @@ public class MapFrame extends JFrame implements GPSListener {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                //if (mapPanel)
+                setMode(DRIVE_MODE);
             }
         });
         getDirectionsButton.addMouseListener(new MouseAdapter() {
@@ -142,17 +145,27 @@ public class MapFrame extends JFrame implements GPSListener {
                 }
             }
         });
+        stopButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                mode = VIEW_MODE;
+            }
+        });
     }
 
     private void calculateAndSendPath(Node startingNode, Node endingNode){
         LinkedList<Vertex> path = directionsGenerator.findShortestPath(startingNode, endingNode);
-        mapPanel.drawPath(path);
+        if (path != null){
+            mapPanel.drawPath(path);
+        }
     }
 
     private void addMenu() {
         JMenuBar menuBar = new JMenuBar();
         JMenu appearanceMenu = new JMenu("Appearance");
         JMenuItem showHideBorders = new JMenuItem("Show/hide borders");
+        JMenuItem clearSelection = new JMenuItem("Clear selection");
         showHideBorders.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -160,7 +173,14 @@ public class MapFrame extends JFrame implements GPSListener {
                 mapPanel.repaint();
             }
         });
+        clearSelection.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mapPanel.clearSelection();
+            }
+        });
         appearanceMenu.add(showHideBorders);
+        appearanceMenu.add(clearSelection);
         menuBar.add(appearanceMenu);
         this.setJMenuBar(menuBar);
     }
@@ -176,11 +196,28 @@ public class MapFrame extends JFrame implements GPSListener {
     public void processEvent(GPSEvent e) {
         currentLon = e.getLongitude();
         currentLat = e.getLatitude();
-        boolean onPath = directionsGenerator.areCoordinatesOnPath(currentLon, currentLat);
-        if (!onPath){
-            notificationPanel.setText("Off route. Recalculating...");
-            calculateAndSendPath(new Node(currentLon, currentLat), directionsGenerator.pa);
+        if (mode.equals(DRIVE_MODE)){
+            drawPerson(currentLon, currentLat);
+            Node currentNode = map.findNearestNode(currentLon, currentLat);
+            boolean onPath = directionsGenerator.areCoordinatesOnPath(currentLon, currentLat);
+            if (reachedTarget(currentNode)){
+                setMode(VIEW_MODE);
+            }
+            if (!onPath){
+                notificationPanel.setText("Off route. Recalculating...");
+
+                calculateAndSendPath(currentNode, directionsGenerator.getCurrentTarget());
+            }
+            notificationPanel.setText("Driving on route...");
         }
+    }
+
+    private boolean reachedTarget(Node currentNode){
+        return (currentNode.equals(directionsGenerator.getCurrentTarget()));
+    }
+
+    private void drawPerson(double lon, double lat){
+        mapPanel.drawPerson(lon, lat);
     }
 
     /**

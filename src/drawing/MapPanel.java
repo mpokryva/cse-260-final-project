@@ -10,6 +10,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -60,12 +61,19 @@ public class MapPanel extends JPanel {
      * The driving path to draw, if exists.
      */
     private ArrayList<Node> pathToDraw;
+
+    private Ellipse2D.Double person;
+
+    private static final double PERSON_WIDTH = 5;
+    private static final double PERSON_HEIGHT = 5;
+
     /**
      * Initializes the fields of this MapPanel, and not much else.
      *
      * @param map The Map of this MapPanel.
      */
     public MapPanel(Map map) {
+        person = new Ellipse2D.Double();
         this.map = map;
         addZoomListener();
         addPanListener();
@@ -201,9 +209,6 @@ public class MapPanel extends JPanel {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 double amountRotated = -1 * e.getPreciseWheelRotation();
-                // Makes sure user can't zoom infinitely in or out.
-                //if ((mouseWheelClicks >= MAXIMUM_ZOOM_OUT || amountRotated > 0) &&
-                //     (mouseWheelClicks <= MAXIMUM_ZOOM_IN || amountRotated < 0)) {
                 double scaleFactor = 10;    //10 chosen arbitrarily.
                 double zoomScaleFactor = zoom / scaleFactor;
                 double amountToZoom = amountRotated * zoomScaleFactor;
@@ -224,7 +229,7 @@ public class MapPanel extends JPanel {
                 repaint();
             }
 
-            //  }
+
         });
     }
 
@@ -311,7 +316,10 @@ public class MapPanel extends JPanel {
             }
             g2.draw(wayLine);
         }
-
+        g2.setColor(Color.CYAN);
+        if (person != null) {
+            g2.draw(person);
+        }
     }
 
     /**
@@ -360,6 +368,11 @@ public class MapPanel extends JPanel {
         g2.fill(triangle);
         g2.draw(triangle);
         g2.setColor(Color.BLACK);
+    }
+
+    public void drawPerson(double lon, double lat) {
+        person = new Ellipse2D.Double(convertLonToPixels(lon, lat), convertLatToPixels(lat), PERSON_WIDTH, PERSON_HEIGHT);
+        repaint();
     }
 
     /**
@@ -487,19 +500,31 @@ public class MapPanel extends JPanel {
         return boundariesShowing;
     }
 
-    public void setPath(LinkedList<Vertex> path){
+    public void setPath(LinkedList<Vertex> path) {
         drawPath(path);
     }
 
-    public boolean areBothLocationSelected(){
+    public boolean areBothLocationSelected() {
         return (startingNode != null && endingNode != null);
     }
 
-    public boolean isStartingLocationSelected(){
+    public boolean isStartingLocationSelected() {
         return (startingNode != null);
     }
 
-    public boolean isEndingLocationSelected(){
+    public boolean isEndingLocationSelected() {
         return (endingNode != null);
+    }
+
+    public void clearSelection() {
+        person = null;
+        pathToDraw = null;
+        startingNode = null;
+        endingNode = null;
+        repaint();
+    }
+
+    public boolean isPathSelected() {
+        return (pathToDraw != null && startingNode != null && endingNode != null);
     }
 }
