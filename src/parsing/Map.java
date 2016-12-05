@@ -168,29 +168,6 @@ public class Map implements Graph {
                 edgeList.add(edge);
                 first = second;
             }
-            /*
-            //if (way.hasTag("highway")){
-                List<Node> nodesInWay = this.findNodesInWay(way);
-
-                Node firstNode = nodesInWay.get(0);
-                Node lastNode = nodesInWay.get(nodesInWay.size() - 1);
-                int nodesWithMultipleWays = 0;
-                for (int i = 1; i < nodesInWay.size()-1; i++) {
-                    Node testNode = nodesInWay.get(i);
-                    List<Way> wayWithNode = findWaysByNode(testNode);
-                    if (wayWithNode.size() > 1) {
-                        nodesWithMultipleWays++;
-                        Edge edge = constructEdge(way, firstNode, testNode);
-                        idToEdgeMap.put(edge.getWayId(), edge);
-                        firstNode = testNode;
-                    }
-                }
-                if (nodesWithMultipleWays == 0){
-                    Edge edge = constructEdge(way, firstNode, lastNode);
-                    idToEdgeMap.put(edge.getWayId(), edge);
-                }
-            //}
-            */
         }
         HashMap<String, Vertex> idToVertexMap = new HashMap<>();
         for (Edge edge : edgeList) {
@@ -217,17 +194,8 @@ public class Map implements Graph {
             }
         }
         graph = new VertexEdgeCollection(idToVertexMap, edgeList);
-        //int lone = countLoneNodes(nodeList);
     }
 
-    private int countLoneNodes(List<Node> nodes) {
-        int loneNodes = 0;
-        for (Node node : nodes) {
-            if (findWaysByNode(node).size() == 0)
-                loneNodes++;
-        }
-        return loneNodes;
-    }
 
 
     /**
@@ -335,8 +303,6 @@ public class Map implements Graph {
 
         }
         return nodesInWay.subList(firstIndex, lastIndex);
-
-
     }
 
 

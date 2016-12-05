@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -314,6 +315,9 @@ public class MapPanel extends JPanel {
         }
         g2.setColor(Color.CYAN);
         if (person != null) {
+            if (this.getBounds().contains(person.getBounds2D())){
+                //pan();
+            }
             g2.draw(person);
         }
     }
